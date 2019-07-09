@@ -1,0 +1,64 @@
+{
+  "platform": {},
+  "root": "/tmp/drone-random",
+  "files": [
+    {
+      "path": "/tmp/drone-random/home/drone",
+      "mode": 448,
+      "is_dir": true
+    },
+    {
+      "path": "/tmp/drone-random/drone/src",
+      "mode": 448,
+      "is_dir": true
+    },
+    {
+      "path": "/tmp/drone-random/opt",
+      "mode": 448,
+      "is_dir": true
+    },
+    {
+      "path": "/tmp/drone-random/home/drone/.netrc",
+      "mode": 384,
+      "data": "bWFjaGluZSBnaXRodWIuY29tIGxvZ2luIG9jdG9jYXQgcGFzc3dvcmQgY29ycmVjdC1ob3JzZS1iYXR0ZXJ5LXN0YXBsZQ=="
+    }
+  ],
+  "steps": [
+    {
+      "args": [
+        "-e",
+        "/tmp/drone-random/opt/build"
+      ],
+      "command": "/bin/sh",
+      "files": [
+        {
+          "path": "/tmp/drone-random/opt/build",
+          "mode": 448,
+          "data": "CnNldCAtZQoKZWNobyArICJnbyBidWlsZCIKZ28gYnVpbGQKCg=="
+        }
+      ],
+      "name": "build",
+      "working_dir": "/tmp/drone-random/drone/src"
+    },
+    {
+      "args": [
+        "-e",
+        "/tmp/drone-random/opt/test"
+      ],
+      "command": "/bin/sh",
+      "depends_on": [
+        "build"
+      ],
+      "files": [
+        {
+          "path": "/tmp/drone-random/opt/test",
+          "mode": 448,
+          "data": "CnNldCAtZQoKZWNobyArICJnbyB0ZXN0IgpnbyB0ZXN0Cgo="
+        }
+      ],
+      "name": "test",
+      "run_policy": 3,
+      "working_dir": "/tmp/drone-random/drone/src"
+    }
+  ]
+}

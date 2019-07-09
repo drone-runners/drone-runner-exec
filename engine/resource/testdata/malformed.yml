@@ -1,0 +1,8 @@
+---
+kind: pipeline
+type: exec
+
+steps:
+ foo: bar
+
+...

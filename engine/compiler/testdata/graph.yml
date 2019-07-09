@@ -1,0 +1,13 @@
+kind: pipeline
+type: exec
+name: default
+
+steps:
+- name: build
+  commands:
+  - go build
+
+- name: test
+  commands:
+  - go test
+  depends_on: [ build ]

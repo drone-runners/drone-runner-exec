@@ -1,0 +1,37 @@
+kind: pipeline
+name: default
+
+steps:
+- name: test
+  image: golang:1.12
+  volumes:
+  - name: gocache
+    path: /go
+  commands:
+  - go test -v -cover ./...
+
+- name: build
+  image: golang:1.12
+  volumes:
+  - name: gocache
+    path: /go
+  commands:
+  - sh scripts/build_all.sh
+  - sh scripts/bundle.sh
+  when:
+    event: [ push, tag ]
+
+- name: publish
+  image: plugins/github-release
+  settings:
+    files:
+      - release/drone_*.tar.gz
+      - release/drone_*_checksums.txt
+    api_key:
+      from_secret: github_api_key
+    when:
+      event: [ tag ]
+
+volumes:
+- name: gocache
+  temp: {}

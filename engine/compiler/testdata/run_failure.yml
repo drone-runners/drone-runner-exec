@@ -1,0 +1,13 @@
+kind: pipeline
+type: exec
+name: default
+
+clone:
+  disable: true
+
+steps:
+- name: build
+  commands:
+  - go build
+  when:
+    status: [ failure ]

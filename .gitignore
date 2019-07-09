@@ -1,0 +1,4 @@
+drone-runner-exec
+release/*
+.env
+NOTES*

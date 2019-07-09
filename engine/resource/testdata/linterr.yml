@@ -1,0 +1,10 @@
+---
+kind: pipeline
+type: exec
+
+steps:
+- commands:
+  - go build
+  - go test
+
+...

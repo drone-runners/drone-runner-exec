@@ -107,6 +107,7 @@ func run(*kingpin.ParseContext) error {
 				tracer,
 				remote,
 				engine,
+				config.Runner.Procs,
 			),
 		},
 		Filter: &client.Filter{

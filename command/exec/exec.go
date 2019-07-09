@@ -43,6 +43,7 @@ type command struct {
 	Environ map[string]string
 	Secrets map[string]string
 	Pretty  bool
+	Procs   int64
 }
 
 func (c *command) run(*kingpin.ParseContext) error {
@@ -142,6 +143,7 @@ func (c *command) run(*kingpin.ParseContext) error {
 		pipeline.NopReporter(),
 		console.New(c.Pretty),
 		engine.New(),
+		c.Procs,
 	).Exec(ctx, spec, state)
 }
 

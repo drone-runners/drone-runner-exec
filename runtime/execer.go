@@ -16,6 +16,7 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/natessilva/dag"
+	"golang.org/x/sync/semaphore"
 )
 
 // Execer is the execution context for executing the intermediate
@@ -29,6 +30,7 @@ type execer struct {
 	engine   engine.Engine
 	reporter pipeline.Reporter
 	streamer pipeline.Streamer
+	sem      *semaphore.Weighted
 }
 
 // NewExecer returns a new execer used
@@ -36,12 +38,19 @@ func NewExecer(
 	reporter pipeline.Reporter,
 	streamer pipeline.Streamer,
 	engine engine.Engine,
+	procs int64,
 ) Execer {
-	return &execer{
+	exec := &execer{
 		reporter: reporter,
 		streamer: streamer,
 		engine:   engine,
 	}
+	if procs > 0 {
+		// optional semaphor that limits the number of steps
+		// that can execute concurrently.
+		exec.sem = semaphore.NewWeighted(procs)
+	}
+	return exec
 }
 
 // Exec executes the intermediate representation of the pipeline
@@ -94,6 +103,26 @@ func (e *execer) exec(ctx context.Context, state *pipeline.State, spec *engine.S
 		state.Cancel()
 		return nil
 	default:
+	}
+
+	if e.sem != nil {
+		// the semaphore limits the number of steps that can run
+		// concurrently. acquire the semaphore and release when
+		// the pipeline completes.
+		if err := e.sem.Acquire(ctx, 1); err != nil {
+			return nil
+		}
+
+		defer func() {
+			// recover from a panic to ensure the semaphore is
+			// released to prevent deadlock. we do not expect a
+			// panic, however, we are being overly cautious.
+			if r := recover(); r != nil {
+				// TODO log the panic.
+			}
+			// release the semaphore
+			e.sem.Release(1)
+		}()
 	}
 
 	switch {

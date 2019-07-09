@@ -155,7 +155,7 @@ func (s *Runner) Run(ctx context.Context, stage *drone.Stage) error {
 	// or build for security reasons.
 	if s.Match != nil && s.Match(data.Repo, data.Build) == false {
 		logger.Error("cannot process stage, access denied")
-		state.FailAll(errors.New("cannot process stage. access denied"))
+		state.FailAll(errors.New("insufficient permission to run the pipeline"))
 		return s.Reporter.ReportStage(noContext, state)
 	}
 

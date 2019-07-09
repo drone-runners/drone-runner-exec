@@ -11,6 +11,7 @@ import (
 	"github.com/drone-runners/drone-runner-exec/command/daemon/config"
 	"github.com/drone-runners/drone-runner-exec/engine"
 	"github.com/drone-runners/drone-runner-exec/engine/resource"
+	"github.com/drone-runners/drone-runner-exec/internal/match"
 	"github.com/drone-runners/drone-runner-exec/runtime"
 
 	"github.com/drone/runner-go/client"
@@ -98,6 +99,11 @@ func run(*kingpin.ParseContext) error {
 			Environ:  config.Runner.Environ,
 			Machine:  config.Runner.Name,
 			Reporter: tracer,
+			Match: match.Func(
+				config.Limit.Repos,
+				config.Limit.Events,
+				config.Limit.Trusted,
+			),
 			Secret: secret.External(
 				config.Secret.Endpoint,
 				config.Secret.Token,

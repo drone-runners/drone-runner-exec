@@ -56,6 +56,12 @@ type Config struct {
 		Environ  map[string]string `envconfig:"DRONE_RUNNER_ENVIRON"`
 	}
 
+	Limit struct {
+		Repos   []string `envconfig:"DRONE_LIMIT_REPOS"`
+		Events  []string `envconfig:"DRONE_LIMIT_EVENTS"`
+		Trusted bool     `envconfig:"DRONE_LIMIT_TRUSTED"`
+	}
+
 	Secret struct {
 		Endpoint   string `envconfig:"DRONE_SECRET_PLUGIN_ENDPOINT"`
 		Token      string `envconfig:"DRONE_SECRET_PLUGIN_TOKEN"`

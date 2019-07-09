@@ -9,6 +9,7 @@ _Please note the exec runner is experimental and may not be suitable for product
 # Todos
 
 - [ ] detailed documentation at docs.drone.io
+- [x] support for client side filtering
 - [x] support for detached steps
 - [ ] support for windows
 - [ ] provide osx launcher file

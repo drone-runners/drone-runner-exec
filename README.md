@@ -9,7 +9,7 @@ _Please note the exec runner is experimental and may not be suitable for product
 # Todos
 
 - [ ] detailed documentation at docs.drone.io
-- [ ] support for detached steps
+- [x] support for detached steps
 - [ ] support for windows
 - [ ] provide osx launcher file
 - [ ] provide linux systemd file

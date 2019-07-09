@@ -118,7 +118,7 @@ func (e *execer) exec(ctx context.Context, state *pipeline.State, spec *engine.S
 			// released to prevent deadlock. we do not expect a
 			// panic, however, we are being overly cautious.
 			if r := recover(); r != nil {
-				// TODO log the panic.
+				// TODO(bradrydzewsi) log the panic.
 			}
 			// release the semaphore
 			e.sem.Release(1)
@@ -164,6 +164,17 @@ func (e *execer) exec(ctx context.Context, state *pipeline.State, spec *engine.S
 	// writer used to stream build logs.
 	wc := e.streamer.Stream(noContext, state, step.Name)
 	wc = replacer.New(wc, step.Secrets)
+
+	// if the step is configured as a daemon, it is detached
+	// from the main process and executed separately.
+	// todo(bradrydzewski) this code is still experimental.
+	if step.Detach {
+		go func() {
+			e.engine.Run(ctx, spec, copy, wc)
+			wc.Close()
+		}()
+		return nil
+	}
 
 	exited, err := e.engine.Run(ctx, spec, copy, wc)
 

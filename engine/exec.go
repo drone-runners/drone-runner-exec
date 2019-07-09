@@ -95,6 +95,10 @@ func (e *engine) Run(ctx context.Context, spec *Spec, step *Step, output io.Writ
 		return nil, err
 	}
 
+	logrus.WithField("pid", cmd.Process.Pid).
+		WithField("step", step.Name).
+		Trace("process started")
+
 	done := make(chan error)
 	go func() {
 		done <- cmd.Wait()
@@ -104,6 +108,11 @@ func (e *engine) Run(ctx context.Context, spec *Spec, step *Step, output io.Writ
 	case err = <-done:
 	case <-ctx.Done():
 		cmd.Process.Kill()
+
+		logrus.WithField("pid", cmd.Process.Pid).
+			WithField("step", step.Name).
+			Trace("process killed")
+
 		return nil, ctx.Err()
 	}
 
@@ -118,6 +127,11 @@ func (e *engine) Run(ctx context.Context, spec *Spec, step *Step, output io.Writ
 	if exiterr, ok := err.(*exec.ExitError); ok {
 		state.ExitCode = exiterr.ExitCode()
 	}
+
+	logrus.WithField("pid", cmd.Process.Pid).
+		WithField("step", step.Name).
+		WithField("exit", state.ExitCode).
+		Trace("process finished")
 	return state, err
 }
 

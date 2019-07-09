@@ -1,0 +1,16 @@
+[Unit]
+Description=drone-runner-exec
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5s
+Environment=DRONE_RPC_PROTO=
+Environment=DRONE_RPC_HOST=
+Environment=DRONE_RPC_SECRET=
+Environment=DRONE_DEBUG=true
+Environment=DRONE_TRACE=false
+ExecStart=/usr/local/bin/drone-runner-exec
+
+[Install]
+WantedBy=multi-user.target

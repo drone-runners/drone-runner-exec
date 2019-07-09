@@ -11,10 +11,10 @@ _Please note the exec runner is experimental and may not be suitable for product
 - [ ] detailed documentation at docs.drone.io
 - [x] support for client side filtering
 - [x] support for detached steps
-- [ ] support for windows
-- [ ] provide osx launcher file
-- [ ] provide linux systemd file
-- [ ] provide windows new-service command
+- [ ] test windows
+- [ ] test launchd file in contrib for osx
+- [ ] test systemd file in contrib for linux
+- [ ] provide windows service configuration file
 
 # Installation
 

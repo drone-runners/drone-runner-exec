@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>KeepAlive</key>
+		<true/>
+
+		<key>Label</key>
+		<string>io.drone.runner.exec</string>
+
+		<key>EnvironmentVariables</key>
+		<dict>
+			<key>DRONE_RPC_PROTO</key>
+			<string><!-- insert server scheme here --></string>
+
+			<key>DRONE_RPC_HOST</key>
+			<string><!-- insert server hostname here --></string>
+
+			<key>DRONE_RPC_SECRET</key>
+			<string><!-- insert secret here --></string>
+
+			<key>DRONE_DEBUG</key>
+			<string>true</string>
+
+			<key>DRONE_TRACE</key>
+			<string>false</string>
+		</dict>
+
+		<key>Program</key>
+		<string>/usr/local/bin/drone-runner-exec</string>
+
+		<key>RunAtLoad</key>
+		<true/>
+	</dict>
+</plist>

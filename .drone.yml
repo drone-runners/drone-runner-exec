@@ -4,20 +4,24 @@ name: default
 steps:
 - name: test
   image: golang:1.12
-  volumes:
-  - name: gocache
-    path: /go
+  environment:
+    GO111MODULE: on
   commands:
   - go test -v -cover ./...
+  volumes:
+  - name: deps
+    path: /go
 
 - name: build
   image: golang:1.12
-  volumes:
-  - name: gocache
-    path: /go
+  environment:
+    GO111MODULE: on
   commands:
   - sh scripts/build_all.sh
   - sh scripts/bundle.sh
+  volumes:
+  - name: deps
+    path: /go
   when:
     event: [ push, tag ]
 
@@ -33,5 +37,5 @@ steps:
     event: [ tag ]
 
 volumes:
-- name: gocache
+- name: deps
   temp: {}

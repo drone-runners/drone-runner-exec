@@ -11,6 +11,9 @@ _Please note the exec runner is experimental and may not be suitable for product
 - [ ] detailed documentation at docs.drone.io
 - [ ] support for detached steps
 - [ ] support for windows
+- [ ] provide osx launcher file
+- [ ] provide linux systemd file
+- [ ] provide windows new-service command
 
 # Installation
 

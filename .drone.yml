@@ -29,8 +29,8 @@ steps:
       - release/drone_*_checksums.txt
     api_key:
       from_secret: github_api_key
-    when:
-      event: [ tag ]
+  when:
+    event: [ tag ]
 
 volumes:
 - name: gocache

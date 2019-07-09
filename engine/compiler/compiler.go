@@ -125,6 +125,7 @@ func (c *Compiler) Compile(ctx context.Context) *engine.Spec {
 	envs := environ.Combine(
 		c.Environ,
 		c.Build.Params,
+		environ.Proxy(),
 		environ.System(c.System),
 		environ.Repo(c.Repo),
 		environ.Build(c.Build),

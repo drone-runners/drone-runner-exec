@@ -1,4 +1,5 @@
 drone-runner-exec
+drone-runner-exec.exe
 release/*
 .env
 NOTES*

@@ -158,7 +158,7 @@ func Register(app *kingpin.Application) {
 		Default(".drone.yml").
 		FileVar(&c.Source)
 
-	s.Arg("pretty", "pretty print the output").
+	s.Flag("pretty", "pretty print the output").
 		Default(fmt.Sprint(tty)).
 		BoolVar(&c.Pretty)
 

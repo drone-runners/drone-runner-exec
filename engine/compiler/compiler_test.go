@@ -2,12 +2,15 @@
 // Use of this source code is governed by the Polyform License
 // that can be found in the LICENSE file.
 
+// +build !windows
+
 package compiler
 
 import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/dchest/uniuri"
@@ -132,9 +135,16 @@ func testCompile(t *testing.T, source, golden string) *engine.Spec {
 	// is deterministic, for testing purposes.
 	random = notRandom
 
-	// restore the default random function.
+	// replace the temp directory with /tmp for consistent
+	tempdir = func() string {
+		return "/tmp"
+	}
+
+	// restore the default random function and the previously
+	// specified temporary directory
 	defer func() {
 		random = uniuri.New
+		tempdir = os.TempDir
 	}()
 
 	manifest, err := manifest.ParseFile(source)

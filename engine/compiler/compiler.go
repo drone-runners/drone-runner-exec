@@ -7,6 +7,7 @@ package compiler
 import (
 	"context"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -25,6 +26,9 @@ import (
 
 // random generator function
 var random = uniuri.New
+
+// temporary directory function
+var tempdir = os.TempDir
 
 // Compiler compiles the Yaml configuration file to an
 // intermediate representation optimized for simple execution.
@@ -75,7 +79,10 @@ type Compiler struct {
 // Compile compiles the configuration file.
 func (c *Compiler) Compile(ctx context.Context) *engine.Spec {
 	spec := new(engine.Spec)
-	spec.Root = fmt.Sprintf("/tmp/drone-%s", random())
+	spec.Root = filepath.Join(
+		tempdir(),
+		fmt.Sprintf("drone-%s", random()),
+	)
 
 	spec.Platform.OS = c.Pipeline.Platform.OS
 	spec.Platform.Arch = c.Pipeline.Platform.Arch
@@ -125,6 +132,7 @@ func (c *Compiler) Compile(ctx context.Context) *engine.Spec {
 	envs := environ.Combine(
 		c.Environ,
 		c.Build.Params,
+		hostEnviron(),
 		environ.Proxy(),
 		environ.System(c.System),
 		environ.Repo(c.Repo),
@@ -139,8 +147,12 @@ func (c *Compiler) Compile(ctx context.Context) *engine.Spec {
 				Email: c.Build.AuthorEmail,
 			},
 		}),
+		// TODO(bradrydzewski) windows variable HOMEDRIVE
+		// TODO(bradrydzewski) windows variable LOCALAPPDATA
 		map[string]string{
 			"HOME":                homedir,
+			"HOMEPATH":            homedir, // for windows
+			"USERPROFILE":         homedir, // for windows
 			"DRONE_HOME":          sourcedir,
 			"DRONE_WORKSPACE":     sourcedir,
 			"GIT_TERMINAL_PROMPT": "0",
@@ -149,7 +161,7 @@ func (c *Compiler) Compile(ctx context.Context) *engine.Spec {
 
 	// create clone step, maybe
 	if c.Pipeline.Clone.Disable == false {
-		clonepath := filepath.Join(spec.Root, "opt", "clone")
+		clonepath := filepath.Join(spec.Root, "opt", "clone"+shell.Suffix)
 		clonefile := shell.Script(
 			clone.Commands(
 				clone.Args{
@@ -182,7 +194,7 @@ func (c *Compiler) Compile(ctx context.Context) *engine.Spec {
 
 	// create steps
 	for _, src := range c.Pipeline.Steps {
-		buildpath := filepath.Join(spec.Root, "opt", src.Name)
+		buildpath := filepath.Join(spec.Root, "opt", src.Name+shell.Suffix)
 		buildfile := shell.Script(src.Commands)
 
 		cmd, args := shell.Command()

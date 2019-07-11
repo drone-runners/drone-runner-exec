@@ -6,9 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - defined pipeline scheme
 - created pipeline parser
 - created pipeline runner
-- support for secrets
-- support for linux
-- support for darwin
-- support for windows
+- enabled runner dashboard
+- enabled secret plugins
 - optional concurrency limits
 - optional repository filters
+- official support for linux
+- official support for darwin
+- official support for windows

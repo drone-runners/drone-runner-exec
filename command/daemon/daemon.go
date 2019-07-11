@@ -23,6 +23,8 @@ import (
 	"github.com/drone/runner-go/server"
 	"github.com/drone/signal"
 
+	"github.com/joho/godotenv"
+	"github.com/orandin/lumberjackrus"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/alecthomas/kingpin.v2"
@@ -30,27 +32,29 @@ import (
 
 var nocontext = context.Background()
 
+// envfile path
+var envfile string
+
+// run starts the runner daemon and listens for termination
+// signals to stop the server.
 func run(*kingpin.ParseContext) error {
-	config, err := config.Load()
-	if err != nil {
-		logrus.WithError(err).Fatal("cannot load configuration")
-		return err
-	}
+	godotenv.Load(envfile)
 
-	if config.Debug {
-		logrus.SetLevel(logrus.DebugLevel)
-	}
-	if config.Trace {
-		logrus.SetLevel(logrus.TraceLevel)
-	}
-
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(nocontext)
 	defer cancel()
 
 	ctx = signal.WithContextFunc(ctx, func() {
 		println("received signal, terminating process")
 		cancel()
 	})
+
+	config, err := config.Load()
+	if err != nil {
+		logrus.WithError(err).Fatal("cannot load configuration")
+		return err
+	}
+
+	setupLogger(config)
 
 	cli := client.New(
 		config.Client.Address,
@@ -165,8 +169,36 @@ func run(*kingpin.ParseContext) error {
 	return err
 }
 
+func setupLogger(config config.Config) error {
+	if config.Debug {
+		logrus.SetLevel(logrus.DebugLevel)
+	}
+	if config.Trace {
+		logrus.SetLevel(logrus.TraceLevel)
+	}
+	if config.Logger.File == "" {
+		return nil
+	}
+	hook, err := lumberjackrus.NewHook(
+		&lumberjackrus.LogFile{
+			Filename:   config.Logger.File,
+			MaxSize:    config.Logger.MaxSize,
+			MaxBackups: config.Logger.MaxBackups,
+			MaxAge:     config.Logger.MaxAge,
+		},
+		logrus.InfoLevel,
+		&logrus.TextFormatter{},
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+	logrus.AddHook(hook)
+	return nil
+}
+
 // Register registers the command.
 func Register(app *kingpin.Application) {
-	app.Command("daemon", "starts the runner daemon").
-		Default().Action(run)
+	cmd := app.Command("daemon", "starts the runner daemon").Default().Action(run)
+	cmd.Arg("envfile", "load the environment variable file").Default("").StringVar(&envfile)
 }

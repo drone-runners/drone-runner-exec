@@ -17,6 +17,13 @@ type Config struct {
 	Debug bool `envconfig:"DRONE_DEBUG"`
 	Trace bool `envconfig:"DRONE_TRACE"`
 
+	Logger struct {
+		File       string `envconfig:"DRONE_LOG_FILE"`
+		MaxAge     int    `envconfig:"DRONE_LOG_FILE_MAX_AGE"     default:"1"`
+		MaxBackups int    `envconfig:"DRONE_LOG_FILE_MAX_BACKUPS" default:"1"`
+		MaxSize    int    `envconfig:"DRONE_LOG_FILE_MAX_SIZE"    default:"100"`
+	}
+
 	Client struct {
 		Address    string `ignored:"true"`
 		Proto      string `envconfig:"DRONE_RPC_PROTO"  default:"http"`

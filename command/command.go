@@ -10,6 +10,7 @@ import (
 	"github.com/drone-runners/drone-runner-exec/command/compile"
 	"github.com/drone-runners/drone-runner-exec/command/daemon"
 	"github.com/drone-runners/drone-runner-exec/command/exec"
+	"github.com/drone-runners/drone-runner-exec/command/service"
 
 	"gopkg.in/alecthomas/kingpin.v2"
 )
@@ -24,6 +25,7 @@ func Command() {
 	compile.Register(app)
 	daemon.Register(app)
 	exec.Register(app)
+	service.Register(app)
 
 	kingpin.Version(version)
 	kingpin.MustParse(app.Parse(os.Args[1:]))

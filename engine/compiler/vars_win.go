@@ -6,6 +6,9 @@
 
 package compiler
 
+// netrc filename
+const netrc = "_netrc"
+
 // parameters that may be useful to child processes. some
 // parameters are required by powershell, without which, will
 // return 8009001d powershell error.

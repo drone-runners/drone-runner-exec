@@ -114,7 +114,7 @@ func (c *Compiler) Compile(ctx context.Context) *engine.Spec {
 
 	// creates the netrc file
 	if c.Netrc != nil {
-		netrcpath := filepath.Join(homedir, ".netrc")
+		netrcpath := filepath.Join(homedir, netrc)
 		netrcdata := fmt.Sprintf(
 			"machine %s login %s password %s",
 			c.Netrc.Machine,

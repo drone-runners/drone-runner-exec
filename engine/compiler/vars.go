@@ -6,6 +6,9 @@
 
 package compiler
 
+// netrc filename
+const netrc = ".netrc"
+
 // parameters that may be useful or required by child processes
 // to successfully execute.
 var hostVars = []string{

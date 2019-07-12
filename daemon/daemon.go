@@ -2,13 +2,14 @@
 // Use of this source code is governed by the Polyform License
 // that can be found in the LICENSE file.
 
+// Package daemon implements the daemon runner.
+
 package daemon
 
 import (
 	"context"
 	"time"
 
-	"github.com/drone-runners/drone-runner-exec/command/daemon/config"
 	"github.com/drone-runners/drone-runner-exec/engine"
 	"github.com/drone-runners/drone-runner-exec/engine/resource"
 	"github.com/drone-runners/drone-runner-exec/internal/match"
@@ -21,39 +22,14 @@ import (
 	"github.com/drone/runner-go/pipeline/remote"
 	"github.com/drone/runner-go/secret"
 	"github.com/drone/runner-go/server"
-	"github.com/drone/signal"
 
-	"github.com/joho/godotenv"
 	"github.com/orandin/lumberjackrus"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
-	"gopkg.in/alecthomas/kingpin.v2"
 )
 
-var nocontext = context.Background()
-
-// envfile path
-var envfile string
-
-// run starts the runner daemon and listens for termination
-// signals to stop the server.
-func run(*kingpin.ParseContext) error {
-	godotenv.Load(envfile)
-
-	ctx, cancel := context.WithCancel(nocontext)
-	defer cancel()
-
-	ctx = signal.WithContextFunc(ctx, func() {
-		println("received signal, terminating process")
-		cancel()
-	})
-
-	config, err := config.Load()
-	if err != nil {
-		logrus.WithError(err).Fatal("cannot load configuration")
-		return err
-	}
-
+// Run runs the service and blocks until complete.
+func Run(ctx context.Context, config Config) error {
 	setupLogger(config)
 
 	cli := client.New(
@@ -67,7 +43,7 @@ func run(*kingpin.ParseContext) error {
 		)
 	}
 	cli.Logger = logger.Logrus(
-		logrus.StandardLogger(),
+		logrus.StandardLogger(), // TODO(bradrydzewski) get from context
 	)
 
 	// Ping the server and block until a successful connection
@@ -161,7 +137,7 @@ func run(*kingpin.ParseContext) error {
 		return nil
 	})
 
-	err = g.Wait()
+	err := g.Wait()
 	if err != nil {
 		logrus.WithError(err).
 			Errorln("shutting down the server")
@@ -169,7 +145,9 @@ func run(*kingpin.ParseContext) error {
 	return err
 }
 
-func setupLogger(config config.Config) error {
+// helper function configures the global logger from
+// the loaded configuration.
+func setupLogger(config Config) error {
 	if config.Debug {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
@@ -195,10 +173,4 @@ func setupLogger(config config.Config) error {
 	}
 	logrus.AddHook(hook)
 	return nil
-}
-
-// Register registers the command.
-func Register(app *kingpin.Application) {
-	cmd := app.Command("daemon", "starts the runner daemon").Default().Action(run)
-	cmd.Arg("envfile", "load the environment variable file").Default("").StringVar(&envfile)
 }

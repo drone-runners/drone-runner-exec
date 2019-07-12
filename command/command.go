@@ -5,11 +5,9 @@
 package command
 
 import (
+	"context"
 	"os"
 
-	"github.com/drone-runners/drone-runner-exec/command/compile"
-	"github.com/drone-runners/drone-runner-exec/command/daemon"
-	"github.com/drone-runners/drone-runner-exec/command/exec"
 	"github.com/drone-runners/drone-runner-exec/command/service"
 
 	"gopkg.in/alecthomas/kingpin.v2"
@@ -18,13 +16,16 @@ import (
 // program version
 var version = "0.0.0"
 
+// empty context
+var nocontext = context.Background()
+
 // Command parses the command line arguments and then executes a
 // subcommand program.
 func Command() {
 	app := kingpin.New("drone", "drone exec runner")
-	compile.Register(app)
-	daemon.Register(app)
-	exec.Register(app)
+	registerCompile(app)
+	registerExec(app)
+	registerDaemon(app)
 	service.Register(app)
 
 	kingpin.Version(version)

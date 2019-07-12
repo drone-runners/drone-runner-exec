@@ -2,7 +2,7 @@
 // Use of this source code is governed by the Polyform License
 // that can be found in the LICENSE file.
 
-package config
+package daemon
 
 import (
 	"fmt"
@@ -76,8 +76,8 @@ type Config struct {
 	}
 }
 
-// Load loads the configuration from the environment.
-func Load() (Config, error) {
+// FromEnviron loads the configuration from the environment.
+func FromEnviron() (Config, error) {
 	var config Config
 	err := envconfig.Process("", &config)
 	if err != nil {

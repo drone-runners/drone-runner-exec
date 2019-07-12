@@ -2,38 +2,45 @@
 // Use of this source code is governed by the Polyform License
 // that can be found in the LICENSE file.
 
-package compile
+package command
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/drone-runners/drone-runner-exec/command/internal"
+	"github.com/drone-runners/drone-runner-exec/engine"
 	"github.com/drone-runners/drone-runner-exec/engine/compiler"
 	"github.com/drone-runners/drone-runner-exec/engine/resource"
+	"github.com/drone-runners/drone-runner-exec/runtime"
+	"github.com/drone/drone-go/drone"
 	"github.com/drone/envsubst"
 	"github.com/drone/runner-go/environ"
 	"github.com/drone/runner-go/manifest"
+	"github.com/drone/runner-go/pipeline"
+	"github.com/drone/runner-go/pipeline/console"
 	"github.com/drone/runner-go/secret"
+	"github.com/drone/signal"
 
+	"github.com/mattn/go-isatty"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
-var nocontext = context.Background()
-
-type command struct {
+type execCommand struct {
 	*internal.Flags
 
 	Source  *os.File
 	Environ map[string]string
 	Secrets map[string]string
+	Pretty  bool
+	Procs   int64
 }
 
-func (c *command) run(*kingpin.ParseContext) error {
+func (c *execCommand) run(*kingpin.ParseContext) error {
 	rawsource, err := ioutil.ReadAll(c.Source)
 	if err != nil {
 		return err
@@ -67,7 +74,7 @@ func (c *command) run(*kingpin.ParseContext) error {
 		return err
 	}
 
-	// parse and lint the configuration
+	// parse and lint the configuration.
 	manifest, err := manifest.ParseString(config)
 	if err != nil {
 		return err
@@ -94,25 +101,65 @@ func (c *command) run(*kingpin.ParseContext) error {
 	}
 	spec := comp.Compile(nocontext)
 
-	// encode the pipeline in json format and print to the
-	// console for inspection.
-	enc := json.NewEncoder(os.Stdout)
-	enc.SetIndent("", "  ")
-	enc.Encode(spec)
-	return nil
+	// create a step object for each pipeline step.
+	for _, step := range spec.Steps {
+		if step.RunPolicy == engine.RunNever {
+			continue
+		}
+		c.Stage.Steps = append(c.Stage.Steps, &drone.Step{
+			StageID:   c.Stage.ID,
+			Number:    len(c.Stage.Steps) + 1,
+			Name:      step.Name,
+			Status:    drone.StatusPending,
+			ErrIgnore: step.IgnoreErr,
+		})
+	}
+
+	// configures the pipeline timeout.
+	timeout := time.Duration(c.Repo.Timeout) * time.Minute
+	ctx, cancel := context.WithTimeout(nocontext, timeout)
+	defer cancel()
+
+	// listen for operating system signals and cancel execution
+	// when received.
+	ctx = signal.WithContextFunc(ctx, func() {
+		println("received signal, terminating process")
+		cancel()
+	})
+
+	state := &pipeline.State{
+		Build:  c.Build,
+		Stage:  c.Stage,
+		Repo:   c.Repo,
+		System: c.System,
+	}
+	return runtime.NewExecer(
+		pipeline.NopReporter(),
+		console.New(c.Pretty),
+		engine.New(),
+		c.Procs,
+	).Exec(ctx, spec, state)
 }
 
-// Register registers the command.
-func Register(app *kingpin.Application) {
-	c := new(command)
+func registerExec(app *kingpin.Application) {
+	c := new(execCommand)
 
-	s := app.Command("compile", "compile the yaml file").
+	cmd := app.Command("exec", "executes a pipeline").
 		Action(c.run)
 
-	s.Arg("source", "source file location").
+	cmd.Arg("source", "source file location").
 		Default(".drone.yml").
 		FileVar(&c.Source)
 
+	cmd.Flag("pretty", "pretty print the output").
+		Default(
+			fmt.Sprint(
+				isatty.IsTerminal(
+					os.Stdout.Fd(),
+				),
+			),
+		).BoolVar(&c.Pretty)
+
 	// shared pipeline flags
-	c.Flags = internal.ParseFlags(s)
+	c.Flags = internal.ParseFlags(cmd)
 }

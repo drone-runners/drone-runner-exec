@@ -164,7 +164,7 @@ func setupLogger(config Config) error {
 			MaxBackups: config.Logger.MaxBackups,
 			MaxAge:     config.Logger.MaxAge,
 		},
-		logrus.InfoLevel,
+		logrus.TraceLevel,
 		&logrus.TextFormatter{},
 		nil,
 	)

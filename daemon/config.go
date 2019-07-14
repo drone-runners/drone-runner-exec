@@ -43,9 +43,9 @@ type Config struct {
 
 	Dashboard struct {
 		Disabled bool   `envconfig:"DRONE_UI_DISABLE"`
-		Username string `envconfig:"DRONE_UI_USERNAME" default:"admin"`
-		Password string `envconfig:"DRONE_UI_PASSWORD" default:"admin"`
-		Realm    string `envconfig:"DRONE_UI_REALM"    default:"MyRealm"`
+		Username string `envconfig:"DRONE_UI_USERNAME"`
+		Password string `envconfig:"DRONE_UI_PASSWORD"`
+		Realm    string `envconfig:"DRONE_UI_REALM" default:"MyRealm"`
 	}
 
 	Server struct {
@@ -91,6 +91,9 @@ func FromEnviron() (Config, error) {
 	}
 	if config.Platform.Arch == "" {
 		config.Platform.Arch = runtime.GOARCH
+	}
+	if config.Dashboard.Password == "" {
+		config.Dashboard.Disabled = true
 	}
 	config.Client.Address = fmt.Sprintf(
 		"%s://%s",

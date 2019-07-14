@@ -18,6 +18,7 @@ import (
 	"github.com/drone/runner-go/client"
 	"github.com/drone/runner-go/handler/router"
 	"github.com/drone/runner-go/logger"
+	loghistory "github.com/drone/runner-go/logger/history"
 	"github.com/drone/runner-go/pipeline/history"
 	"github.com/drone/runner-go/pipeline/remote"
 	"github.com/drone/runner-go/secret"
@@ -46,31 +47,11 @@ func Run(ctx context.Context, config Config) error {
 		logrus.StandardLogger(), // TODO(bradrydzewski) get from context
 	)
 
-	// Ping the server and block until a successful connection
-	// to the server has been established.
-	for {
-		err := cli.Ping(ctx, config.Runner.Name)
-		select {
-		case <-ctx.Done():
-			return nil
-		default:
-		}
-		if ctx.Err() != nil {
-			break
-		}
-		if err != nil {
-			logrus.WithError(err).
-				Errorln("cannot ping the server")
-			time.Sleep(time.Second)
-		} else {
-			logrus.Debugln("successfully pinged the server")
-			break
-		}
-	}
-
 	engine := engine.New()
 	remote := remote.New(cli)
 	tracer := history.New(remote)
+	hook := loghistory.New()
+	logrus.AddHook(hook)
 
 	poller := &runtime.Poller{
 		Client: cli,
@@ -108,22 +89,42 @@ func Run(ctx context.Context, config Config) error {
 	}
 
 	var g errgroup.Group
-	if config.Dashboard.Disabled == false {
-		server := server.Server{
-			Addr: config.Server.Port,
-			Handler: router.New(tracer, router.Config{
-				Username: config.Dashboard.Username,
-				Password: config.Dashboard.Password,
-				Realm:    config.Dashboard.Realm,
-			}),
+	server := server.Server{
+		Addr: config.Server.Port,
+		Handler: router.New(tracer, hook, router.Config{
+			Username: config.Dashboard.Username,
+			Password: config.Dashboard.Password,
+			Realm:    config.Dashboard.Realm,
+		}),
+	}
+
+	logrus.WithField("addr", config.Server.Port).
+		Infoln("starting the server")
+
+	g.Go(func() error {
+		return server.ListenAndServe(ctx)
+	})
+
+	// Ping the server and block until a successful connection
+	// to the server has been established.
+	for {
+		err := cli.Ping(ctx, config.Runner.Name)
+		select {
+		case <-ctx.Done():
+			return nil
+		default:
 		}
-
-		logrus.WithField("addr", config.Server.Port).
-			Debugln("starting the server")
-
-		g.Go(func() error {
-			return server.ListenAndServe(ctx)
-		})
+		if ctx.Err() != nil {
+			break
+		}
+		if err != nil {
+			logrus.WithError(err).
+				Errorln("cannot ping the server")
+			time.Sleep(time.Second)
+		} else {
+			logrus.Infoln("successfully pinged the server")
+			break
+		}
 	}
 
 	g.Go(func() error {
@@ -131,7 +132,7 @@ func Run(ctx context.Context, config Config) error {
 			WithField("endpoint", config.Client.Address).
 			WithField("kind", resource.Kind).
 			WithField("type", resource.Type).
-			Debugln("starting the poller")
+			Infoln("starting the poller")
 
 		poller.Poll(ctx, config.Runner.Capacity)
 		return nil

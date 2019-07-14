@@ -11,8 +11,7 @@ import (
 	"sync"
 
 	"github.com/drone/runner-go/client"
-
-	"github.com/sirupsen/logrus"
+	"github.com/drone/runner-go/logger"
 )
 
 var noContext = context.Background()
@@ -32,17 +31,17 @@ func (p *Poller) Poll(ctx context.Context, n int) {
 	var wg sync.WaitGroup
 	for i := 0; i < n; i++ {
 		wg.Add(1)
-		go func() {
+		go func(i int) {
 			for {
 				select {
 				case <-ctx.Done():
 					wg.Done()
 					return
 				default:
-					p.poll(ctx)
+					p.poll(ctx, i+1)
 				}
 			}
-		}()
+		}(i)
 	}
 
 	wg.Wait()
@@ -50,14 +49,15 @@ func (p *Poller) Poll(ctx context.Context, n int) {
 
 // poll requests a stage for execution from the server, and then
 // dispatches for execution.
-func (p *Poller) poll(ctx context.Context) error {
-	logrus.Debug("request stage from server")
+func (p *Poller) poll(ctx context.Context, thread int) error {
+	log := logger.FromContext(ctx).WithField("thread", thread)
+	log.WithField("thread", thread).Debug("request stage from remote server")
 
 	// request a new build stage for execution from the central
 	// build server.
 	stage, err := p.Client.Request(ctx, p.Filter)
 	if err != nil {
-		logrus.WithError(err).Error("cannot request stage")
+		log.WithError(err).Error("cannot request stage")
 		return err
 	}
 
@@ -67,5 +67,6 @@ func (p *Poller) poll(ctx context.Context) error {
 		return nil
 	}
 
-	return p.Runner.Run(noContext, stage)
+	return p.Runner.Run(
+		logger.WithContext(noContext, log), stage)
 }

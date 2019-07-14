@@ -13,8 +13,7 @@ import (
 	"os/exec"
 
 	"github.com/drone/runner-go/environ"
-
-	"github.com/sirupsen/logrus"
+	"github.com/drone/runner-go/logger"
 )
 
 // New returns a new engine.
@@ -38,7 +37,9 @@ func (e *engine) Setup(ctx context.Context, spec *Spec) error {
 		}
 		err = os.MkdirAll(file.Path, 0700)
 		if err != nil {
-			logrus.WithError(err).Error("cannot create working directory")
+			logger.FromContext(ctx).
+				WithError(err).
+				Error("cannot create working directory")
 			return err
 		}
 	}
@@ -50,7 +51,9 @@ func (e *engine) Setup(ctx context.Context, spec *Spec) error {
 		}
 		err = ioutil.WriteFile(file.Path, file.Data, os.FileMode(file.Mode))
 		if err != nil {
-			logrus.WithError(err).Error("cannot write file")
+			logger.FromContext(ctx).
+				WithError(err).
+				Error("cannot write file")
 			return err
 		}
 	}
@@ -63,7 +66,9 @@ func (e *engine) Setup(ctx context.Context, spec *Spec) error {
 			}
 			err = ioutil.WriteFile(file.Path, file.Data, os.FileMode(file.Mode))
 			if err != nil {
-				logrus.WithError(err).Error("cannot write file")
+				logger.FromContext(ctx).
+					WithError(err).
+					Error("cannot write file")
 				return err
 			}
 		}
@@ -95,9 +100,9 @@ func (e *engine) Run(ctx context.Context, spec *Spec, step *Step, output io.Writ
 		return nil, err
 	}
 
-	logrus.WithField("pid", cmd.Process.Pid).
-		WithField("step", step.Name).
-		Trace("process started")
+	log := logger.FromContext(ctx)
+	log = log.WithField("process.pid", cmd.Process.Pid)
+	log.Debug("process started")
 
 	done := make(chan error)
 	go func() {
@@ -109,10 +114,7 @@ func (e *engine) Run(ctx context.Context, spec *Spec, step *Step, output io.Writ
 	case <-ctx.Done():
 		cmd.Process.Kill()
 
-		logrus.WithField("pid", cmd.Process.Pid).
-			WithField("step", step.Name).
-			Trace("process killed")
-
+		log.Debug("process killed")
 		return nil, ctx.Err()
 	}
 
@@ -128,10 +130,8 @@ func (e *engine) Run(ctx context.Context, spec *Spec, step *Step, output io.Writ
 		state.ExitCode = exiterr.ExitCode()
 	}
 
-	logrus.WithField("pid", cmd.Process.Pid).
-		WithField("step", step.Name).
-		WithField("exit", state.ExitCode).
-		Trace("process finished")
+	log.WithField("process.exit", state.ExitCode).
+		Debug("process finished")
 	return state, err
 }
 

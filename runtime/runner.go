@@ -21,11 +21,10 @@ import (
 	"github.com/drone/envsubst"
 	"github.com/drone/runner-go/client"
 	"github.com/drone/runner-go/environ"
+	"github.com/drone/runner-go/logger"
 	"github.com/drone/runner-go/manifest"
 	"github.com/drone/runner-go/pipeline"
 	"github.com/drone/runner-go/secret"
-
-	"github.com/sirupsen/logrus"
 )
 
 // Runnner runs the pipeline.
@@ -62,13 +61,12 @@ type Runner struct {
 
 // Run runs the pipeline stage.
 func (s *Runner) Run(ctx context.Context, stage *drone.Stage) error {
-	logger := logrus.WithFields(logrus.Fields{
-		"stage.id":     stage.ID,
-		"stage.name":   stage.Name,
-		"stage.number": stage.Number,
-	})
+	log := logger.FromContext(ctx).
+		WithField("stage.id", stage.ID).
+		WithField("stage.name", stage.Name).
+		WithField("stage.number", stage.Number)
 
-	logger.Debug("received stage")
+	log.Debug("stage received")
 
 	// delivery to a single agent is not guaranteed, which means
 	// we need confirm receipt. The first agent that confirms
@@ -77,27 +75,25 @@ func (s *Runner) Run(ctx context.Context, stage *drone.Stage) error {
 	stage.Machine = s.Machine
 	err := s.Client.Accept(ctx, stage)
 	if err != nil {
-		logger.WithError(err).Error("cannot accept stage")
+		log.WithError(err).Error("cannot accept stage")
 		return err
 	}
 
-	logger.Debug("accepted stage")
+	log.Debug("stage accepted")
 
 	data, err := s.Client.Detail(ctx, stage)
 	if err != nil {
-		logger.WithError(err).Error("cannot get stage details")
+		log.WithError(err).Error("cannot get stage details")
 		return err
 	}
 
-	logger = logrus.WithFields(logrus.Fields{
-		"repo.id":        data.Repo.ID,
-		"repo.namespace": data.Repo.Namespace,
-		"repo.name":      data.Repo.Name,
-		"build.id":       data.Build.ID,
-		"build.number":   data.Build.Number,
-	})
+	log = log.WithField("repo.id", data.Repo.ID).
+		WithField("repo.namespace", data.Repo.Namespace).
+		WithField("repo.name", data.Repo.Name).
+		WithField("build.id", data.Build.ID).
+		WithField("build.number", data.Build.Number)
 
-	logger.Debug("retrieved stage details")
+	log.Debug("stage details fetched")
 
 	ctxdone, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -116,9 +112,9 @@ func (s *Runner) Run(ctx context.Context, stage *drone.Stage) error {
 		done, _ := s.Client.Watch(ctxdone, data.Build.ID)
 		if done {
 			cancel()
-			logger.Debugln("received cancellation")
+			log.Debugln("received cancellation")
 		} else {
-			logger.Debugln("done listening for cancellations")
+			log.Debugln("done listening for cancellations")
 		}
 	}()
 
@@ -154,7 +150,7 @@ func (s *Runner) Run(ctx context.Context, stage *drone.Stage) error {
 	// pipeline. An agent may choose to reject a repository
 	// or build for security reasons.
 	if s.Match != nil && s.Match(data.Repo, data.Build) == false {
-		logger.Error("cannot process stage, access denied")
+		log.Error("cannot process stage, access denied")
 		state.FailAll(errors.New("insufficient permission to run the pipeline"))
 		return s.Reporter.ReportStage(noContext, state)
 	}
@@ -163,7 +159,7 @@ func (s *Runner) Run(ctx context.Context, stage *drone.Stage) error {
 	// update configuration file string.
 	config, err := envsubst.Eval(string(data.Config.Data), subf)
 	if err != nil {
-		logger.WithError(err).Error("cannot emulate bash substitution")
+		log.WithError(err).Error("cannot emulate bash substitution")
 		state.FailAll(err)
 		return s.Reporter.ReportStage(noContext, state)
 	}
@@ -171,7 +167,7 @@ func (s *Runner) Run(ctx context.Context, stage *drone.Stage) error {
 	// parse the yaml configuration file.
 	manifest, err := manifest.ParseString(config)
 	if err != nil {
-		logger.WithError(err).Error("cannot parse configuration file")
+		log.WithError(err).Error("cannot parse configuration file")
 		state.FailAll(err)
 		return s.Reporter.ReportStage(noContext, state)
 	}
@@ -179,7 +175,7 @@ func (s *Runner) Run(ctx context.Context, stage *drone.Stage) error {
 	// find the named stage in the yaml configuration file.
 	resource, err := resource.Lookup(stage.Name, manifest)
 	if err != nil {
-		logger.WithError(err).Error("cannot find pipeline resource")
+		log.WithError(err).Error("cannot find pipeline resource")
 		state.FailAll(err)
 		return s.Reporter.ReportStage(noContext, state)
 	}
@@ -223,17 +219,18 @@ func (s *Runner) Run(ctx context.Context, stage *drone.Stage) error {
 	stage.Started = time.Now().Unix()
 	stage.Status = drone.StatusRunning
 	if err := s.Client.Update(ctx, stage); err != nil {
-		logger.WithError(err).Error("cannot update stage")
+		log.WithError(err).Error("cannot update stage")
 		return err
 	}
 
-	logger.Debug("updated stage to running")
+	log.Debug("updated stage to running")
 
+	ctxcancel = logger.WithContext(ctxcancel, log)
 	err = s.Execer.Exec(ctxcancel, spec, state)
 	if err != nil {
-		logger.WithError(err).Debug("stage failed")
+		log.WithError(err).Debug("stage failed")
 		return err
 	}
-	logger.Debug("updated stage to complete")
+	log.Debug("updated stage to complete")
 	return nil
 }

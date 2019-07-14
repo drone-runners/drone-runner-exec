@@ -44,7 +44,9 @@ func Run(ctx context.Context, config Config) error {
 		)
 	}
 	cli.Logger = logger.Logrus(
-		logrus.StandardLogger(), // TODO(bradrydzewski) get from context
+		logrus.NewEntry(
+			logrus.StandardLogger(), // TODO(bradrydzewski) get from context
+		),
 	)
 
 	engine := engine.New()
@@ -119,10 +121,10 @@ func Run(ctx context.Context, config Config) error {
 		}
 		if err != nil {
 			logrus.WithError(err).
-				Errorln("cannot ping the server")
+				Errorln("cannot ping the remote server")
 			time.Sleep(time.Second)
 		} else {
-			logrus.Infoln("successfully pinged the server")
+			logrus.Infoln("successfully pinged the remote server")
 			break
 		}
 	}
@@ -132,7 +134,7 @@ func Run(ctx context.Context, config Config) error {
 			WithField("endpoint", config.Client.Address).
 			WithField("kind", resource.Kind).
 			WithField("type", resource.Type).
-			Infoln("starting the poller")
+			Infoln("polling the remote server")
 
 		poller.Poll(ctx, config.Runner.Capacity)
 		return nil
@@ -149,6 +151,11 @@ func Run(ctx context.Context, config Config) error {
 // helper function configures the global logger from
 // the loaded configuration.
 func setupLogger(config Config) error {
+	logger.Default = logger.Logrus(
+		logrus.NewEntry(
+			logrus.StandardLogger(),
+		),
+	)
 	if config.Debug {
 		logrus.SetLevel(logrus.DebugLevel)
 	}

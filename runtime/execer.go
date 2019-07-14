@@ -1,3 +1,5 @@
+// Code generated automatically. DO NOT EDIT.
+
 // Copyright 2019 Drone.IO Inc. All rights reserved.
 // Use of this source code is governed by the Polyform License
 // that can be found in the LICENSE file.
@@ -12,6 +14,7 @@ import (
 	"github.com/drone-runners/drone-runner-exec/engine/replacer"
 	"github.com/drone/drone-go/drone"
 	"github.com/drone/runner-go/environ"
+	"github.com/drone/runner-go/logger"
 	"github.com/drone/runner-go/pipeline"
 
 	"github.com/hashicorp/go-multierror"
@@ -104,6 +107,10 @@ func (e *execer) exec(ctx context.Context, state *pipeline.State, spec *engine.S
 		return nil
 	default:
 	}
+
+	log := logger.FromContext(ctx)
+	log = log.WithField("step.name", step.Name)
+	ctx = logger.WithContext(ctx, log)
 
 	if e.sem != nil {
 		// the semaphore limits the number of steps that can run

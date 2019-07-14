@@ -14,8 +14,8 @@ import (
 
 var nocontext = context.Background()
 
-// a manager manages the service lifecycle. 
-type manager struct{
+// a manager manages the service lifecycle.
+type manager struct {
 	cancel context.CancelFunc
 }
 
@@ -32,7 +32,7 @@ func (m *manager) Start(service.Service) error {
 }
 
 // Stop stops the service.
-func (m *manager) Stop(service.Service) error  {
+func (m *manager) Stop(service.Service) error {
 	m.cancel()
 	return nil
 }

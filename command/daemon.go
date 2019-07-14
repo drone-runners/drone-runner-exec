@@ -9,9 +9,9 @@ import (
 
 	"github.com/drone-runners/drone-runner-exec/daemon"
 
-	"gopkg.in/alecthomas/kingpin.v2"
-	"github.com/joho/godotenv"
 	"github.com/drone/signal"
+	"github.com/joho/godotenv"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 type daemonCommand struct {

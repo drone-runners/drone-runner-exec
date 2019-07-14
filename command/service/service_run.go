@@ -7,11 +7,11 @@ package service
 import (
 	"github.com/drone-runners/drone-runner-exec/daemon/service"
 
-	"gopkg.in/alecthomas/kingpin.v2"
 	"github.com/joho/godotenv"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
-type runCommand struct{
+type runCommand struct {
 	config service.Config
 }
 
@@ -33,7 +33,7 @@ func registerRun(cmd *kingpin.CmdClause) {
 	s.Flag("name", "service name").
 		Default(service.DefaultName).
 		StringVar(&c.config.Name)
-	
+
 	s.Flag("desc", "service description").
 		Default(service.DefaultDesc).
 		StringVar(&c.config.Desc)
@@ -45,7 +45,7 @@ func registerRun(cmd *kingpin.CmdClause) {
 	s.Flag("password", "windows account password").
 		Default("").
 		StringVar(&c.config.Password)
-	
+
 	s.Flag("config", "service configuration file").
 		Default(configPath()).
 		StringVar(&c.config.ConfigFile)

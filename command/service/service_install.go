@@ -13,7 +13,7 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
-type installCommand struct{
+type installCommand struct {
 	config service.Config
 }
 
@@ -38,7 +38,7 @@ func registerInstall(cmd *kingpin.CmdClause) {
 	s.Flag("name", "service name").
 		Default(service.DefaultName).
 		StringVar(&c.config.Name)
-	
+
 	s.Flag("desc", "service description").
 		Default(service.DefaultDesc).
 		StringVar(&c.config.Desc)
@@ -50,7 +50,7 @@ func registerInstall(cmd *kingpin.CmdClause) {
 	s.Flag("password", "windows account password").
 		Default("").
 		StringVar(&c.config.Password)
-	
+
 	s.Flag("config", "service configuration file").
 		Default(configPath()).
 		StringVar(&c.config.ConfigFile)

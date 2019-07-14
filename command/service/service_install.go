@@ -21,7 +21,7 @@ func (c *installCommand) run(*kingpin.ParseContext) error {
 	fmt.Printf("read configuration %s\n", c.config.ConfigFile)
 	fmt.Printf("installing service %s\n", c.config.Name)
 	if _, err := os.Stat(c.config.ConfigFile); err != nil {
-		return fmt.Errorf("cannot read configuration", c.config.ConfigFile)
+		return fmt.Errorf("cannot read configuration")
 	}
 	s, err := service.New(c.config)
 	if err != nil {

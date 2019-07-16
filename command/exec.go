@@ -133,12 +133,20 @@ func (c *execCommand) run(*kingpin.ParseContext) error {
 		Repo:   c.Repo,
 		System: c.System,
 	}
-	return runtime.NewExecer(
+	err = runtime.NewExecer(
 		pipeline.NopReporter(),
 		console.New(c.Pretty),
 		engine.New(),
 		c.Procs,
 	).Exec(ctx, spec, state)
+	if err != nil {
+		return err
+	}
+	switch state.Stage.Status {
+	case drone.StatusError, drone.StatusFailing:
+		os.Exit(1)
+	}
+	return nil
 }
 
 func registerExec(app *kingpin.Application) {

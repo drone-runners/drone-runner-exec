@@ -6,16 +6,6 @@ __Warning__ that the exec runner should only be used in a trusted environment. T
 
 _Please note the exec runner is experimental and may not be suitable for production use. Furthermore, this runner is not yet subject to support or service level agreements._
 
-# Todos
-
-- [ ] detailed documentation at docs.drone.io
-- [x] support for client side filtering
-- [x] support for detached steps
-- [x] test windows
-- [x] test launchd file in contrib for osx
-- [ ] test systemd file in contrib for linux
-- [ ] provide windows service configuration file
-
 # Installation
 
 ## Download
@@ -23,7 +13,7 @@ _Please note the exec runner is experimental and may not be suitable for product
 Download and install the runner:
 
 ```cmd
-$ curl -L https://github.com/drone-runners/drone-runner-exec/releases/download/v1.0.0-beta.1/drone_runner_exec_darwin_amd64.tar.gz | tar zx
+$ curl -L https://github.com/drone-runners/drone-runner-exec/releases/download/v1.0.0-beta.2/drone_runner_exec_darwin_amd64.tar.gz | tar zx
 $ sudo cp drone-runner-exec /usr/local/bin
 ```
 

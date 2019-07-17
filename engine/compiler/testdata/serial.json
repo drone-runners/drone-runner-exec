@@ -34,7 +34,7 @@
         {
           "path": "/tmp/drone-random/opt/clone",
           "mode": 448,
-          "data": "CnNldCAtZQoKZWNobyArICJnaXQgaW5pdCIKZ2l0IGluaXQKCmVjaG8gKyAiZ2l0IHJlbW90ZSBhZGQgb3JpZ2luICIKZ2l0IHJlbW90ZSBhZGQgb3JpZ2luIAoKZWNobyArICJnaXQgZmV0Y2ggIG9yaWdpbiArcmVmcy9oZWFkcy9tYXN0ZXI6IgpnaXQgZmV0Y2ggIG9yaWdpbiArcmVmcy9oZWFkcy9tYXN0ZXI6CgplY2hvICsgImdpdCBjaGVja291dCAgLWIgbWFzdGVyIgpnaXQgY2hlY2tvdXQgIC1iIG1hc3RlcgoK"
+          "data": "CnNldCAtZQoKZWNobyArICJnaXQgaW5pdCIKZ2l0IGluaXQKCmVjaG8gKyAiZ2l0IHJlbW90ZSBhZGQgb3JpZ2luICIKZ2l0IHJlbW90ZSBhZGQgb3JpZ2luIAoKZWNobyArICJnaXQgZmV0Y2ggIG9yaWdpbiArcmVmcy9oZWFkcy9tYXN0ZXI6IgpnaXQgZmV0Y2ggIG9yaWdpbiArcmVmcy9oZWFkcy9tYXN0ZXI6CgplY2hvICsgImdpdCBjaGVja291dCAgLWIgbWFzdGVyIgpnaXQgY2hlY2tvdXQgIC1iIG1hc3Rlcgo="
         }
       ],
       "secrets": [],
@@ -55,7 +55,7 @@
         {
           "path": "/tmp/drone-random/opt/build",
           "mode": 448,
-          "data": "CnNldCAtZQoKZWNobyArICJnbyBidWlsZCIKZ28gYnVpbGQKCg=="
+          "data": "CnNldCAtZQoKZWNobyArICJnbyBidWlsZCIKZ28gYnVpbGQK"
         }
       ],
       "secrets": [],
@@ -75,7 +75,7 @@
         {
           "path": "/tmp/drone-random/opt/test",
           "mode": 448,
-          "data": "CnNldCAtZQoKZWNobyArICJnbyB0ZXN0IgpnbyB0ZXN0Cgo="
+          "data": "CnNldCAtZQoKZWNobyArICJnbyB0ZXN0IgpnbyB0ZXN0Cg=="
         }
       ],
       "secrets": [],

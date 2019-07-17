@@ -22,6 +22,7 @@ import (
 	"github.com/drone/runner-go/shell"
 
 	"github.com/dchest/uniuri"
+	"github.com/gosimple/slug"
 )
 
 // random generator function
@@ -194,7 +195,8 @@ func (c *Compiler) Compile(ctx context.Context) *engine.Spec {
 
 	// create steps
 	for _, src := range c.Pipeline.Steps {
-		buildpath := filepath.Join(spec.Root, "opt", src.Name+shell.Suffix)
+		buildslug := slug.Make(src.Name)
+		buildpath := filepath.Join(spec.Root, "opt", buildslug+shell.Suffix)
 		buildfile := shell.Script(src.Commands)
 
 		cmd, args := shell.Command()

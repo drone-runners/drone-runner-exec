@@ -34,7 +34,7 @@
         {
           "path": "/tmp/drone-random/opt/build",
           "mode": 448,
-          "data": "CnNldCAtZQoKZWNobyArICJnbyBidWlsZCIKZ28gYnVpbGQKCg=="
+          "data": "CnNldCAtZQoKZWNobyArICJnbyBidWlsZCIKZ28gYnVpbGQK"
         }
       ],
       "name": "build",

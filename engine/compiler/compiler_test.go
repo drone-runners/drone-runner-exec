@@ -176,8 +176,15 @@ func testCompile(t *testing.T, source, golden string) *engine.Spec {
 
 	ignore := cmpopts.IgnoreFields(engine.Step{}, "Envs", "Secrets")
 	if diff := cmp.Diff(got, want, ignore); len(diff) != 0 {
+		dump(got)
 		t.Errorf(diff)
 	}
 
 	return got
+}
+
+func dump(v interface{}) {
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetIndent("", "  ")
+	enc.Encode(v)
 }

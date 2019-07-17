@@ -34,7 +34,7 @@
         {
           "path": "/tmp/drone-random/opt/build",
           "mode": 448,
-          "data": "CnNldCAtZQoKZWNobyArICJnbyBidWlsZCIKZ28gYnVpbGQKCg=="
+          "data": "CnNldCAtZQoKZWNobyArICJnbyBidWlsZCIKZ28gYnVpbGQK"
         }
       ],
       "name": "build",
@@ -54,7 +54,7 @@
         {
           "path": "/tmp/drone-random/opt/test",
           "mode": 448,
-          "data": "CnNldCAtZQoKZWNobyArICJnbyB0ZXN0IgpnbyB0ZXN0Cgo="
+          "data": "CnNldCAtZQoKZWNobyArICJnbyB0ZXN0IgpnbyB0ZXN0Cg=="
         }
       ],
       "name": "test",

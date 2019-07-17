@@ -16,6 +16,7 @@ require (
 	github.com/drone/signal v1.0.0
 	github.com/golang/mock v1.3.1
 	github.com/google/go-cmp v0.3.0
+	github.com/gosimple/slug v1.5.0
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/joho/godotenv v1.3.0
 	github.com/kardianos/service v1.0.0
@@ -23,6 +24,7 @@ require (
 	github.com/mattn/go-isatty v0.0.8
 	github.com/natessilva/dag v0.0.0-20180124060714-7194b8dcc5c4
 	github.com/orandin/lumberjackrus v1.0.1
+	github.com/rainycape/unidecode v0.0.0-20150907023854-cb7f23ec59be // indirect
 	github.com/sirupsen/logrus v1.4.2
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6

@@ -11,7 +11,7 @@ description: |
   Yaml specification document.
 ---
 
-This document introduces the data structures that represent the _exec pipeline_. The exec pipeline is continuous integration pipeline that executes commands directly on the host machine.
+This document introduces the data structures that represent the _exec pipeline_. The exec pipeline is a continuous integration pipeline that executes commands directly on the host machine.
 
 # The `Resource` interface
 

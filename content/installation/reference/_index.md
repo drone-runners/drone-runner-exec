@@ -1,6 +1,6 @@
 ---
 date: 2000-01-01T00:00:00+00:00
-title: Reference
+title: Configuration Reference
 title_in_header: Reference
 author: bradrydzewski
 weight: 2
@@ -10,4 +10,4 @@ description: |
   Index of all configuration parameters.
 ---
 
-Here is the index of all configuration parameters:
+Index of all configuration parameters:

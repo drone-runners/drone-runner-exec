@@ -36,7 +36,7 @@ DRONE_RPC_HOST=drone.company.com
 DRONE_RPC_SECRET=super-duper-secret
 ```
 
-This article references the below configuration options. See [Configuration]({{< relref "/configuration/reference" >}}) for a complete list of configuration options.
+This article references the below configuration options. See [Configuration]({{< relref "reference" >}}) for a complete list of configuration options.
 
 DRONE_RPC_HOST
 : provides the hostname (and optional port) of your Drone server. The runner connects to the server at the host address to receive pipelines for execution.

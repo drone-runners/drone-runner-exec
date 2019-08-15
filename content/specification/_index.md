@@ -1,8 +1,8 @@
 ---
 date: 2000-01-01T00:00:00+00:00
-title: YAML Specification
+title: Specification
 author: bradrydzewski
-weight: 20
+weight: 4
 toc: false
 type: spec
 hide_children: true

@@ -3,7 +3,7 @@ date: 2000-01-01T00:00:00+00:00
 title: Exec Runner
 author: bradrydzewski
 weight: 1
-expand: usage/_index.md
+expand: configuration/_index.md
 ---
 
 The exec runner is a daemon (aka agent) that executes build pipelines directly on the host machine without isolation. This documentation provides details for installing, configuring and using the exec runner.
@@ -18,7 +18,7 @@ If you want to install this runner:
 
 If you want to configure this runner for your project:
 
-{{< link "/usage" >}}
+{{< link "/configuration" >}}
 
 If you have questions or require assistance:
 

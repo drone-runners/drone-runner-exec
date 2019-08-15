@@ -27,7 +27,7 @@ steps:
 
 Drone automatically injects environment variables containing repository and commit metadata into each pipeline step. See the environment variable index for a full list of variables.
 
-{{< link "/usage/variables" >}}
+{{< link "/configuration/variables" >}}
 
 # Secrets
 

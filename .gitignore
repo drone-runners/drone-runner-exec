@@ -1,5 +1,7 @@
 drone-runner-exec
 drone-runner-exec.exe
 release/*
+docs/public/*
+docs/themes/*
 .env
 NOTES*

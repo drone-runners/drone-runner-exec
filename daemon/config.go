@@ -49,10 +49,11 @@ type Config struct {
 	}
 
 	Server struct {
-		Proto string `envconfig:"DRONE_SERVER_PROTO"`
-		Host  string `envconfig:"DRONE_SERVER_HOST"`
-		Port  string `envconfig:"DRONE_SERVER_PORT" default:":3000"`
-		Acme  bool   `envconfig:"DRONE_SERVER_ACME"`
+		Proto string `envconfig:"DRONE_HTTP_PROTO"`
+		Host  string `envconfig:"DRONE_HTTP_HOST"`
+		Port  string `envconfig:"DRONE_HTTP_BIND" default:":3000"`
+		Acme  bool   `envconfig:"DRONE_ACME_ENABLED"`
+		Email string `envconfig:"DRONE_ACME_EMAIL"`
 	}
 
 	Runner struct {

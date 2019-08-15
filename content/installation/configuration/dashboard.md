@@ -11,7 +11,7 @@ description: |
 
 The exec runner features a user interface (web interface) for read only access to recent runtime information and log activity. The user interface simplifies troubleshooting and access to system information.
 
-![runner dashboard](../../screenshots/runner_dashboard.png)
+![runner dashboard](../../../screenshots/runner_dashboard.png)
 
 _The above screenshot demonstrates information available for troubleshooting pipeline execution. This includes access to system logs associated with the pipeline._
 

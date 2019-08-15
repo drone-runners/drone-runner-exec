@@ -1,9 +1,9 @@
-baseURL: https://drone-runner-exec.netlify.com #/runner/exec
+baseURL: https://exec-runner.docs.drone.io
 languageCode: en-us
 title: Drone Exec Runner
 theme: drone-hugo-theme
 
-googleAnalytics: "UA-34247933-4"
+#googleAnalytics: "UA-34247933-4"
 
 params:
   algolia_key: 745aeaa8be75dc0c4de55030703ed3f4

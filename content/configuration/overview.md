@@ -5,7 +5,7 @@ author: bradrydzewski
 weight: 1
 toc: false
 description: |
-  Overview of the exec pipelines.
+  Overview of exec pipelines.
 ---
 
 An `exec` pipeline is a pipeline that executes shell commands directly on the host machine without isolation. This is useful for workloads that need to run on the host, or are poorly suited for execution inside containers.

@@ -10,29 +10,26 @@ description: |
 
 Pipeline steps are executed sequentially by default. You can optionally describe your build steps as a [directed acyclic graph](https://en.wikipedia.org/wiki/Directed_acyclic_graph). In the below example we fan-out to execute the first two steps in parallel, and then once complete, we fan-in to execute the final step:
 
-{{< highlight text "linenos=table,hl_lines=23-25" >}}
+{{< highlight text "linenos=table,hl_lines=20-22" >}}
 kind: pipeline
 type: exec
 name: default
 
 steps:
 - name: backend
-  image: golang
   commands:
   - go build
   - go test
 
 - name: frontend
-  image: node
   commands:
   - npm install
   - npm test
 
-- name: notify
-  image: plugins/slack
-  settings:
-    webhook:
-      from_secret: webhook
+- name: publish
+  commands:
+  - docker build -t hello-world .
+  - docker push hello-world
   depends_on:
   - frontend
   - backend

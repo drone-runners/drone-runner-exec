@@ -25,7 +25,7 @@ sudo install -t /usr/local/bin drone-runner-exec
 The exec runner is configured using an environment variable file. The environment file should be stored at the following path: 
 
 ```
-C:\Drone\drone-runner-exec\log.txt
+C:\Drone\drone-runner-exec\config
 ```
 
 This file should use the syntax `<variable>=value` which sets the variable to the given value and `#` for comments. Please note this is not a bash file. Bash syntax and Bash expressions are not supported.

@@ -79,7 +79,7 @@ $ mkdir .drone-runner-exec/
 Install and start the service.
 
 ```
-$ drone-runner-exec service create
+$ drone-runner-exec service install
 $ drone-runner-exec server start
 ```
 

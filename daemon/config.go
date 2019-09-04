@@ -110,7 +110,7 @@ func FromEnviron() (Config, error) {
 	if config.Runner.EnvFile != "" {
 		envs, err := godotenv.Read(config.Runner.EnvFile)
 		if err != nil {
-			return nil, err
+			return config, err
 		}
 		for k, v := range envs {
 			config.Runner.Environ[k] = v

@@ -10,6 +10,8 @@ import (
 	"runtime"
 
 	"github.com/kelseyhightower/envconfig"
+
+	"github.com/joho/godotenv"
 )
 
 // Config stores the system configuration.
@@ -62,6 +64,7 @@ type Config struct {
 		Procs    int64             `envconfig:"DRONE_RUNNER_MAX_PROCS"`
 		Labels   map[string]string `envconfig:"DRONE_RUNNER_LABELS"`
 		Environ  map[string]string `envconfig:"DRONE_RUNNER_ENVIRON"`
+		EnvFile  string            `envconfig:"DRONE_RUNNER_ENVFILE"`
 	}
 
 	Limit struct {
@@ -87,6 +90,9 @@ func FromEnviron() (Config, error) {
 	if config.Runner.Name == "" {
 		config.Runner.Name, _ = os.Hostname()
 	}
+	if config.Runner.Environ == nil {
+		config.Runner.Environ = map[string]string{}
+	}
 	if config.Platform.OS == "" {
 		config.Platform.OS = runtime.GOOS
 	}
@@ -101,5 +107,14 @@ func FromEnviron() (Config, error) {
 		config.Client.Proto,
 		config.Client.Host,
 	)
+	if config.Runner.EnvFile != "" {
+		envs, err := godotenv.Read(config.Runner.EnvFile)
+		if err != nil {
+			return nil, err
+		}
+		for k, v := range envs {
+			config.Runner.Environ[k] = v
+		}
+	}
 	return config, nil
 }

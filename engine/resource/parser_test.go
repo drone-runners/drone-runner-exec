@@ -147,4 +147,9 @@ func TestLint(t *testing.T) {
 	if err := lint(p); err == nil {
 		t.Errorf("Expect error when empty name")
 	}
+
+	p.Steps = []*Step{{Name: "build"}, {Name: "test", Image: "plugins/docker"}}
+	if err := lint(p); err == nil {
+		t.Errorf("Expect error when image defined")
+	}
 }

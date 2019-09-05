@@ -45,6 +45,9 @@ func lint(pipeline *Pipeline) error {
 		if _, ok := names[step.Name]; ok {
 			return errors.New("Linter: duplicate step name")
 		}
+		if step.Image != "" {
+			return errors.New("Linter: cannot define images for an exec pipeline")
+		}
 		names[step.Name] = struct{}{}
 	}
 	return nil

@@ -46,6 +46,11 @@ type (
 		Failure     string                        `json:"failure,omitempty"`
 		Commands    []string                      `json:"commands,omitempty"`
 		When        manifest.Conditions           `json:"when,omitempty"`
+
+		// Image is an unsupported field but is defined so
+		// that we can see when a user is setting this
+		// field and return a linting error.
+		Image string `json:"-"`
 	}
 )
 

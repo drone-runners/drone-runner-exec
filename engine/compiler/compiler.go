@@ -131,9 +131,9 @@ func (c *Compiler) Compile(ctx context.Context) *engine.Spec {
 
 	// create the default environment variables.
 	envs := environ.Combine(
+		hostEnviron(),
 		c.Environ,
 		c.Build.Params,
-		hostEnviron(),
 		environ.Proxy(),
 		environ.System(c.System),
 		environ.Repo(c.Repo),

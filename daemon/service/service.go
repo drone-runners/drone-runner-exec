@@ -43,13 +43,14 @@ func New(conf Config) (service.Service, error) {
 		// In Mac OS, it is impossible to reliably set the PATH
 		// of a LaunchAgent outside the plist file. DRONE_RUNNER_ENVIRON
 		// and DRONE_RUNNER_ENVFILE will NOT work. So we use a custom service template.
-		c := fmt.Sprintf(launchdConfig, os.Getenv("PATH"))
+		nonRootUser := os.Getuid() != 0
 		config.Option = service.KeyValue{
 			"KeepAlive":   true,
 			"RunAtLoad":   true,
-			"UserService": os.Getuid() != 0,
-			// Custom for Mac OS
-			"LaunchdConfig": c,
+			"UserService": nonRootUser,
+		}
+		if nonRootUser {
+			config.Option["LaunchdConfig"] = fmt.Sprintf(launchdConfig, os.Getenv("PATH"))
 		}
 	case "windows":
 		if conf.Username != "" {

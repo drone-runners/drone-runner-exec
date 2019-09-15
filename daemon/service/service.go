@@ -5,6 +5,7 @@
 package service
 
 import (
+	"fmt"
 	"os"
 	"runtime"
 
@@ -39,10 +40,16 @@ func New(conf Config) (service.Service, error) {
 
 	switch runtime.GOOS {
 	case "darwin":
+		// In Mac OS, it is impossible to reliably set the PATH
+		// of a LaunchAgent outside the plist file. DRONE_RUNNER_ENVIRON
+		// and DRONE_RUNNER_ENVFILE will NOT work. So we use a custom service template.
+		c := fmt.Sprintf(launchdConfig, os.Getenv("PATH"))
 		config.Option = service.KeyValue{
 			"KeepAlive":   true,
 			"RunAtLoad":   true,
 			"UserService": os.Getuid() != 0,
+			// Custom for Mac OS
+			"LaunchdConfig": c,
 		}
 	case "windows":
 		if conf.Username != "" {
@@ -56,3 +63,33 @@ func New(conf Config) (service.Service, error) {
 	m := new(manager)
 	return service.New(m, config)
 }
+// launchdConfig is our custom service template.
+const launchdConfig = `<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN"
+"http://www.apple.com/DTDs/PropertyList-1.0.dtd" >
+<plist version='1.0'>
+<dict>
+<key>Label</key><string>{{html .Name}}</string>
+<key>EnvironmentVariables</key>
+<dict>
+	<key>PATH</key>
+	<string>%s</string>
+</dict>
+<key>ProgramArguments</key>
+<array>
+        <string>{{html .Path}}</string>
+{{range .Config.Arguments}}
+        <string>{{html .}}</string>
+{{end}}
+</array>
+{{if .UserName}}<key>UserName</key><string>{{html .UserName}}</string>{{end}}
+{{if .ChRoot}}<key>RootDirectory</key><string>{{html .ChRoot}}</string>{{end}}
+{{if .WorkingDirectory}}<key>WorkingDirectory</key><string>{{html .WorkingDirectory}}</string>{{end}}
+<key>SessionCreate</key><{{bool .SessionCreate}}/>
+<key>KeepAlive</key><{{bool .KeepAlive}}/>
+<key>RunAtLoad</key><{{bool .RunAtLoad}}/>
+<key>Disabled</key><false/>
+</dict>
+</plist>
+`
+

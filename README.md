@@ -9,4 +9,4 @@ Technical Support:<br/>
 https://discourse.drone.io
 
 Issue Tracker and Roadmap:<br/>
-https://trello.com/b/WZWa6FXd/exec-runner
+https://trello.com/b/ttae5E5o/drone

@@ -65,6 +65,7 @@ type Config struct {
 		Labels   map[string]string `envconfig:"DRONE_RUNNER_LABELS"`
 		Environ  map[string]string `envconfig:"DRONE_RUNNER_ENVIRON"`
 		EnvFile  string            `envconfig:"DRONE_RUNNER_ENVFILE"`
+		Path     string            `envconfig:"DRONE_RUNNER_PATH"`
 	}
 
 	Limit struct {
@@ -115,6 +116,9 @@ func FromEnviron() (Config, error) {
 		for k, v := range envs {
 			config.Runner.Environ[k] = v
 		}
+	}
+	if path := config.Runner.Path; path != "" {
+		config.Runner.Environ["PATH"] = path
 	}
 	return config, nil
 }

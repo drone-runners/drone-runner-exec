@@ -108,8 +108,12 @@ func FromEnviron() (Config, error) {
 		config.Client.Proto,
 		config.Client.Host,
 	)
-	if config.Runner.EnvFile != "" {
-		envs, err := godotenv.Read(config.Runner.EnvFile)
+
+	// environment variables can be sourced from a separate
+	// file. These variables are loaded and appended to the
+	// environment list.
+	if file := config.Runner.EnvFile; file != "" {
+		envs, err := godotenv.Read(file)
 		if err != nil {
 			return config, err
 		}
@@ -117,8 +121,19 @@ func FromEnviron() (Config, error) {
 			config.Runner.Environ[k] = v
 		}
 	}
+
+	// setting a custom path is a common configuration
+	// requirement. We therefore provide a configuration
+	// parameter specifically for PATH and then append
+	// to the environment variable list.
 	if path := config.Runner.Path; path != "" {
-		config.Runner.Environ["PATH"] = path
+		switch config.Platform.OS {
+		case "windows":
+			config.Runner.Environ["Path"] = path
+		default:
+			config.Runner.Environ["PATH"] = path
+		}
 	}
+
 	return config, nil
 }

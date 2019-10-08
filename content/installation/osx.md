@@ -40,6 +40,7 @@ This file should use the syntax `<variable>=value` which sets the variable to th
 DRONE_RPC_PROTO=https
 DRONE_RPC_HOST=drone.company.com
 DRONE_RPC_SECRET=super-duper-secret
+DRONE_RUNNER_PATH=/usr/local/bin:/usr/bin:/usr/sbin:/sbin
 ```
 
 This article references the below configuration options. See [Configuration]({{< relref "reference" >}}) for a complete list of configuration options.

@@ -16,7 +16,7 @@ This article explains how to install the exec runner on Windows. The exec runner
 Download and unpack the binary.
 
 ```
-curl -L https://github.com/drone-runners/drone-runner-exec/releases/download/${VERSION}/drone_runner_exec_windows_amd64.tar.gz | tar zx
+curl -L https://github.com/drone-runners/drone-runner-exec/releases/download/latest/drone_runner_exec_windows_amd64.tar.gz | tar zx
 sudo install -t /usr/local/bin drone-runner-exec
 ```
 

@@ -16,7 +16,7 @@ This article explains how to install the exec runner on OSX. The exec runner is 
 Download and unpack the binary. You will need to modify the below commands to use the latest release.
 
 ```text
-$ curl -L https://github.com/drone-runners/drone-runner-exec/releases/download/latest/drone_runner_exec_darwin_amd64.tar.gz | tar zx
+$ curl -L https://github.com/drone-runners/drone-runner-exec/releases/latest/download/drone_runner_exec_darwin_amd64.tar.gz | tar zx
 sudo cp drone-runner-exec /usr/local/bin
 ```
 

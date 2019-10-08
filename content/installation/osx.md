@@ -53,6 +53,9 @@ DRONE_RPC_PROTO
 DRONE_RPC_SECRET
 : provides the shared secret used to authenticate with your Drone server. This must match the secret defined in your Drone server configuration.
 
+DRONE_RUNNER_PATH
+: provides your pipeline steps with the PATH environment variable. This parameter is optional but recommended. You may find the default system path does not include many commands, resulting in command not found errors.
+
 # Step 3 - Logging
 
 The exec runner writes logs to a file on the host machine. The log file location should be configured in the environment file before you start the service. The file location is determined by the user running the process. If the user is root: 
@@ -64,7 +67,7 @@ DRONE_LOG_FILE=/var/log/drone-runner-exec/log.txt
 If the user is non-root:
 
 ```
-DRONE_LOG_FILE=.drone-runner-exec/log.txt
+DRONE_LOG_FILE=/Users/<user>/.drone-runner-exec/log.txt
 ```
 
 The log file directory must be created before you start the service:
@@ -80,7 +83,7 @@ Install and start the service.
 
 ```
 $ drone-runner-exec service install
-$ drone-runner-exec server start
+$ drone-runner-exec service start
 ```
 
 # Step 5 - Verify

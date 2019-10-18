@@ -8,7 +8,7 @@ description: |
   Overview of exec pipelines.
 ---
 
-{{< alert "nocloud"> }}
+{{< alert "nocloud" >}}
 Please note exec pipelines are disabled on Drone Cloud. This feature is only available when self-hosting
 {{< / alert >}}
 

@@ -8,7 +8,7 @@ expand: configuration/_index.md
 
 The exec runner is a daemon (aka agent) that executes build pipelines directly on the host machine without isolation. This documentation provides details for installing, configuring and using the exec runner.
 
-{{< alert "nocloud"> }}
+{{< alert "nocloud" >}}
 Please note exec pipelines are disabled on Drone Cloud. This feature is only available when self-hosting
 {{< / alert >}}
 

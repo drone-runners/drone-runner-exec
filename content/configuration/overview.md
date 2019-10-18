@@ -8,6 +8,10 @@ description: |
   Overview of exec pipelines.
 ---
 
+{{< alert "nocloud"> }}
+Please note exec pipelines are disabled on Drone Cloud. This feature is only available when self-hosting
+{{< / alert >}}
+
 An `exec` pipeline is a pipeline that executes shell commands directly on the host machine without isolation. This is useful for workloads that need to run on the host, or are poorly suited for execution inside containers.
 
 Example pipeline configuration:

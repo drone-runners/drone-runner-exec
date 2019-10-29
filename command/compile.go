@@ -25,6 +25,7 @@ import (
 type compileCommand struct {
 	*internal.Flags
 
+	Root    string
 	Source  *os.File
 	Environ map[string]string
 	Secrets map[string]string
@@ -88,6 +89,7 @@ func (c *compileCommand) run(*kingpin.ParseContext) error {
 		System:   c.System,
 		Environ:  c.Environ,
 		Secret:   secret.StaticVars(c.Secrets),
+		Root:     c.Root,
 	}
 	spec := comp.Compile(nocontext)
 
@@ -104,6 +106,10 @@ func registerCompile(app *kingpin.Application) {
 
 	cmd := app.Command("compile", "compile the yaml file").
 		Action(c.run)
+
+	cmd.Arg("root", "root build directory").
+		Default("").
+		StringVar(&c.Root)
 
 	cmd.Arg("source", "source file location").
 		Default(".drone.yml").

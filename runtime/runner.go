@@ -57,6 +57,9 @@ type Runner struct {
 
 	// Secret provides the compiler with secrets.
 	Secret secret.Provider
+
+	// Root defines the option build root path, defaults to temp directory.
+	Root string
 }
 
 // Run runs the pipeline stage.
@@ -198,6 +201,7 @@ func (s *Runner) Run(ctx context.Context, stage *drone.Stage) error {
 		System:   data.System,
 		Netrc:    data.Netrc,
 		Secret:   secrets,
+		Root:     s.Root,
 	}
 
 	spec := comp.Compile(ctx)

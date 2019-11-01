@@ -75,15 +75,26 @@ type Compiler struct {
 	// Secret returns a named secret value that can be injected
 	// into the pipeline step.
 	Secret secret.Provider
+
+	// Root defines the option build root path, defaults to temp directory.
+	Root string
 }
 
 // Compile compiles the configuration file.
 func (c *Compiler) Compile(ctx context.Context) *engine.Spec {
 	spec := new(engine.Spec)
-	spec.Root = filepath.Join(
-		tempdir(),
-		fmt.Sprintf("drone-%s", random()),
-	)
+
+	if c.Root != "" {
+		spec.Root = filepath.Join(
+			c.Root,
+			fmt.Sprintf("drone-%s", random()),
+		)
+	} else {
+		spec.Root = filepath.Join(
+			tempdir(),
+			fmt.Sprintf("drone-%s", random()),
+		)
+	}
 
 	spec.Platform.OS = c.Pipeline.Platform.OS
 	spec.Platform.Arch = c.Pipeline.Platform.Arch

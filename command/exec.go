@@ -33,6 +33,7 @@ import (
 type execCommand struct {
 	*internal.Flags
 
+	Root    string
 	Source  *os.File
 	Environ map[string]string
 	Secrets map[string]string
@@ -98,6 +99,7 @@ func (c *execCommand) run(*kingpin.ParseContext) error {
 		System:   c.System,
 		Environ:  c.Environ,
 		Secret:   secret.StaticVars(c.Secrets),
+		Root:     c.Root,
 	}
 	spec := comp.Compile(nocontext)
 
@@ -154,6 +156,10 @@ func registerExec(app *kingpin.Application) {
 
 	cmd := app.Command("exec", "executes a pipeline").
 		Action(c.run)
+
+	cmd.Arg("root", "root build directory").
+		Default("").
+		StringVar(&c.Root)
 
 	cmd.Arg("source", "source file location").
 		Default(".drone.yml").

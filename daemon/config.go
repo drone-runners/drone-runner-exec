@@ -66,6 +66,7 @@ type Config struct {
 		Environ  map[string]string `envconfig:"DRONE_RUNNER_ENVIRON"`
 		EnvFile  string            `envconfig:"DRONE_RUNNER_ENVFILE"`
 		Path     string            `envconfig:"DRONE_RUNNER_PATH"`
+		Root     string            `envconfig:"DRONE_RUNNER_ROOT"`
 	}
 
 	Limit struct {

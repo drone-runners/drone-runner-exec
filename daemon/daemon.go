@@ -61,6 +61,7 @@ func Run(ctx context.Context, config Config) error {
 			Client:   cli,
 			Environ:  config.Runner.Environ,
 			Machine:  config.Runner.Name,
+			Root:     config.Runner.Root,
 			Reporter: tracer,
 			Match: match.Func(
 				config.Limit.Repos,

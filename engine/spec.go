@@ -13,6 +13,7 @@ type (
 		Platform Platform `json:"platform,omitempty"`
 		Root     string   `json:"root,omitempty"`
 		Files    []*File  `json:"files,omitempty"`
+		Links    []*Link  `json:"links,omitempty"`
 		Steps    []*Step  `json:"steps,omitempty"`
 	}
 
@@ -41,6 +42,12 @@ type (
 		Mode  uint32 `json:"mode,omitempty"`
 		Data  []byte `json:"data,omitempty"`
 		IsDir bool   `json:"is_dir,omitempty"`
+	}
+
+	// Link defines a symbolic link.
+	Link struct {
+		Source string `json:"source,omitempty"`
+		Target string `json:"target,omitempty"`
 	}
 
 	// Platform defines the target platform.

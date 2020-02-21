@@ -76,8 +76,13 @@ type Compiler struct {
 	// into the pipeline step.
 	Secret secret.Provider
 
-	// Root defines the option build root path, defaults to temp directory.
+	// Root defines the optional build root path, defaults to
+	// temp directory.
 	Root string
+
+	// Symlinks provides an optional list of symlinks that are
+	// created and linked to the pipeline workspace.
+	Symlinks map[string]string
 }
 
 // Compile compiles the configuration file.
@@ -137,6 +142,14 @@ func (c *Compiler) Compile(ctx context.Context) *engine.Spec {
 			Path: netrcpath,
 			Mode: 0600,
 			Data: []byte(netrcdata),
+		})
+	}
+
+	// create symbolic links
+	for source, target := range c.Symlinks {
+		spec.Links = append(spec.Links, &engine.Link{
+			Source: source,
+			Target: filepath.Join(spec.Root, target),
 		})
 	}
 

@@ -58,6 +58,18 @@ func (e *engine) Setup(ctx context.Context, spec *Spec) error {
 		}
 	}
 
+	// create symlinks
+	for _, link := range spec.Links {
+		if err := os.Symlink(link.Source, link.Target); err != nil {
+			logger.FromContext(ctx).
+				WithError(err).
+				WithField("source", link.Source).
+				WithField("target", link.Target).
+				Error("cannot create symlink")
+			return err
+		}
+	}
+
 	// creates step files
 	for _, step := range spec.Steps {
 		for _, file := range step.Files {

@@ -62,6 +62,7 @@ func Run(ctx context.Context, config Config) error {
 			Environ:  config.Runner.Environ,
 			Machine:  config.Runner.Name,
 			Root:     config.Runner.Root,
+			Symlinks: config.Runner.Symlinks,
 			Reporter: tracer,
 			Match: match.Func(
 				config.Limit.Repos,

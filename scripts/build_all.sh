@@ -16,8 +16,8 @@ GOOS=linux GOARCH=arm   go build -o release/linux/arm/drone-runner-exec
 GOOS=linux GOARCH=386   go build -o release/linux/386/drone-runner-exec
 
 # windows
-GOOS=windows GOARCH=amd64 go build -o release/windows/amd64/drone-runner-exec
-GOOS=windows GOARCH=386   go build -o release/windows/386/drone-runner-exec
+GOOS=windows GOARCH=amd64 go build -o release/windows/amd64/drone-runner-exec.exe
+GOOS=windows GOARCH=386   go build -o release/windows/386/drone-runner-exec.exe
 
 # darwin
 GOOS=darwin GOARCH=amd64 go build -o release/darwin/amd64/drone-runner-exec

@@ -187,13 +187,17 @@ func (c *Compiler) Compile(ctx context.Context) *engine.Spec {
 	// create clone step, maybe
 	if c.Pipeline.Clone.Disable == false {
 		clonepath := filepath.Join(spec.Root, "opt", "clone"+shell.Suffix)
+		repoUrl := c.Repo.HTTPURL
+		if repoUrl == "" && c.Repo.SSHURL != "" {
+			repoUrl = c.Repo.SSHURL
+		}
 		clonefile := shell.Script(
 			clone.Commands(
 				clone.Args{
 					Branch: c.Build.Target,
 					Commit: c.Build.After,
 					Ref:    c.Build.Ref,
-					Remote: c.Repo.HTTPURL,
+					Remote: repoUrl,
 				},
 			),
 		)

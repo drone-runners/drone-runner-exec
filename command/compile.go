@@ -14,8 +14,11 @@ import (
 	"github.com/drone-runners/drone-runner-exec/command/internal"
 	"github.com/drone-runners/drone-runner-exec/engine/compiler"
 	"github.com/drone-runners/drone-runner-exec/engine/resource"
+	"github.com/drone-runners/drone-runner-exec/runtime"
+
 	"github.com/drone/envsubst"
 	"github.com/drone/runner-go/environ"
+	"github.com/drone/runner-go/environ/provider"
 	"github.com/drone/runner-go/manifest"
 	"github.com/drone/runner-go/secret"
 
@@ -80,6 +83,12 @@ func (c *compileCommand) run(*kingpin.ParseContext) error {
 
 	// compile the pipeline to an intermediate representation.
 	comp := &compiler.Compiler{
+		Environ: provider.Static(c.Environ),
+		Secret:  secret.StaticVars(c.Secrets),
+		Root:    c.Root,
+	}
+
+	args := runtime.CompilerArgs{
 		Pipeline: resource,
 		Manifest: manifest,
 		Build:    c.Build,
@@ -87,11 +96,9 @@ func (c *compileCommand) run(*kingpin.ParseContext) error {
 		Repo:     c.Repo,
 		Stage:    c.Stage,
 		System:   c.System,
-		Environ:  c.Environ,
-		Secret:   secret.StaticVars(c.Secrets),
-		Root:     c.Root,
 	}
-	spec := comp.Compile(nocontext)
+
+	spec := comp.Compile(nocontext, args)
 
 	// encode the pipeline in json format and print to the
 	// console for inspection.

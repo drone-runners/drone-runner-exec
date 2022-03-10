@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/drone-runners/drone-runner-exec/engine"
-	"github.com/drone-runners/drone-runner-exec/engine/compiler"
 	"github.com/drone-runners/drone-runner-exec/engine/resource"
 
 	"github.com/drone/drone-go/drone"
@@ -32,6 +31,10 @@ type Runner struct {
 	// Client is the remote client responsible for interacting
 	// with the central server.
 	Client client.Client
+
+	// Compiler is responsible for compiling the pipeline
+	// configuration to the intermediate representation.
+	Compiler Compiler
 
 	// Execer is responsible for executing intermediate
 	// representation of the pipeline and returns its results.
@@ -54,17 +57,6 @@ type Runner struct {
 	// intended as a security measure to prevent a runner from
 	// processing an unwanted pipeline.
 	Match func(*drone.Repo, *drone.Build) bool
-
-	// Secret provides the compiler with secrets.
-	Secret secret.Provider
-
-	// Root defines the optional build root path, defaults to
-	// temp directory.
-	Root string
-
-	// Symlinks provides an optional list of symlinks that are
-	// created and linked to the pipeline workspace.
-	Symlinks map[string]string
 }
 
 // Run runs the pipeline stage.
@@ -191,26 +183,22 @@ func (s *Runner) Run(ctx context.Context, stage *drone.Stage) error {
 	secrets := secret.Combine(
 		secret.Static(data.Secrets),
 		secret.Encrypted(),
-		s.Secret,
 	)
 
 	// compile the yaml configuration file to an intermediate
 	// representation, and then
-	comp := &compiler.Compiler{
+	args := CompilerArgs{
 		Pipeline: resource,
 		Manifest: manifest,
-		Environ:  s.Environ,
 		Build:    data.Build,
 		Stage:    stage,
 		Repo:     data.Repo,
 		System:   data.System,
 		Netrc:    data.Netrc,
 		Secret:   secrets,
-		Root:     s.Root,
-		Symlinks: s.Symlinks,
 	}
 
-	spec := comp.Compile(ctx)
+	spec := s.Compiler.Compile(ctx, args)
 	for _, src := range spec.Steps {
 		// steps that are skipped are ignored and are not stored
 		// in the drone database, nor displayed in the UI.

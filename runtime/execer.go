@@ -133,9 +133,9 @@ func (e *execer) exec(ctx context.Context, state *pipeline.State, spec *engine.S
 	}
 
 	switch {
-	case state.Skipped():
-		return nil
 	case state.Cancelled():
+		// skip if the pipeline was cancelled, either by the
+		// end user or due to timeout.
 		return nil
 	case step.RunPolicy == engine.RunNever:
 		return nil

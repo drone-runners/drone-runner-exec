@@ -11,16 +11,18 @@ import (
 	"time"
 
 	"github.com/drone-runners/drone-runner-exec/engine"
+	"github.com/drone-runners/drone-runner-exec/engine/compiler"
 	"github.com/drone-runners/drone-runner-exec/engine/resource"
 	"github.com/drone-runners/drone-runner-exec/internal/match"
 	"github.com/drone-runners/drone-runner-exec/runtime"
 
 	"github.com/drone/runner-go/client"
+	"github.com/drone/runner-go/environ/provider"
 	"github.com/drone/runner-go/handler/router"
 	"github.com/drone/runner-go/logger"
 	loghistory "github.com/drone/runner-go/logger/history"
-	"github.com/drone/runner-go/pipeline/history"
-	"github.com/drone/runner-go/pipeline/remote"
+	"github.com/drone/runner-go/pipeline/reporter/history"
+	"github.com/drone/runner-go/pipeline/reporter/remote"
 	"github.com/drone/runner-go/secret"
 	"github.com/drone/runner-go/server"
 
@@ -61,19 +63,29 @@ func Run(ctx context.Context, config Config) error {
 			Client:   cli,
 			Environ:  config.Runner.Environ,
 			Machine:  config.Runner.Name,
-			Root:     config.Runner.Root,
-			Symlinks: config.Runner.Symlinks,
 			Reporter: tracer,
 			Match: match.Func(
 				config.Limit.Repos,
 				config.Limit.Events,
 				config.Limit.Trusted,
 			),
-			Secret: secret.External(
-				config.Secret.Endpoint,
-				config.Secret.Token,
-				config.Secret.SkipVerify,
-			),
+			Compiler: &compiler.Compiler{
+				Environ: provider.Combine(
+					provider.Static(config.Runner.Environ),
+					provider.External(
+						config.Environ.Endpoint,
+						config.Environ.Token,
+						config.Environ.SkipVerify,
+					),
+				),
+				Secret: secret.External(
+					config.Secret.Endpoint,
+					config.Secret.Token,
+					config.Secret.SkipVerify,
+				),
+				Root:     config.Runner.Root,
+				Symlinks: config.Runner.Symlinks,
+			},
 			Execer: runtime.NewExecer(
 				tracer,
 				remote,

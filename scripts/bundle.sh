@@ -15,6 +15,7 @@ tar -cvzf release/drone_runner_exec_windows_386.tar.gz   -C release/windows/386 
 
 # darwin
 tar -cvzf release/drone_runner_exec_darwin_amd64.tar.gz -C release/darwin/amd64  drone-runner-exec
+tar -cvzf release/drone_runner_exec_darwin_arm64.tar.gz -C release/darwin/arm64  drone-runner-exec
 
 # freebase
 tar -cvzf release/drone_runner_exec_freebsd_amd64.tar.gz -C release/freebsd/amd64 drone-runner-exec

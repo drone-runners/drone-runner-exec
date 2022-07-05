@@ -6,7 +6,7 @@ package engine
 
 type (
 	// Spec provides the pipeline spec. This provides the
-	// required instructions for reproducable pipeline
+	// required instructions for reproducible pipeline
 	// execution.
 	Spec struct {
 		// Metadata Metadata  `json:"metadata,omitempty"`
@@ -28,7 +28,7 @@ type (
 		IgnoreErr    bool              `json:"ignore_err,omitempty"`
 		IgnoreStdout bool              `json:"ignore_stderr,omitempty"`
 		IgnoreStderr bool              `json:"ignore_stdout,omitempty"`
-		Name         string            `json:"name,omitempt"`
+		Name         string            `json:"name,omitempty"`
 		RunPolicy    RunPolicy         `json:"run_policy,omitempty"`
 		Secrets      []*Secret         `json:"secrets,omitempty"`
 		WorkingDir   string            `json:"working_dir,omitempty"`

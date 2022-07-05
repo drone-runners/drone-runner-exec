@@ -13,13 +13,16 @@ import (
 	"os"
 	"testing"
 
-	"github.com/dchest/uniuri"
 	"github.com/drone-runners/drone-runner-exec/engine"
 	"github.com/drone-runners/drone-runner-exec/engine/resource"
+	"github.com/drone-runners/drone-runner-exec/runtime"
+
 	"github.com/drone/drone-go/drone"
+	"github.com/drone/runner-go/environ/provider"
 	"github.com/drone/runner-go/manifest"
 	"github.com/drone/runner-go/secret"
 
+	"github.com/dchest/uniuri"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 )
@@ -94,18 +97,23 @@ func TestCompile_RunFaiure(t *testing.T) {
 // at compile time.
 func TestCompile_Secrets(t *testing.T) {
 	manifest, _ := manifest.ParseFile("testdata/secret.yml")
-	compiler := Compiler{}
-	compiler.Build = &drone.Build{}
-	compiler.Repo = &drone.Repo{}
-	compiler.Stage = &drone.Stage{}
-	compiler.System = &drone.System{}
-	compiler.Netrc = &drone.Netrc{}
-	compiler.Manifest = manifest
-	compiler.Pipeline = manifest.Resources[0].(*resource.Pipeline)
-	compiler.Secret = secret.StaticVars(map[string]string{
-		"my_username": "octocat",
-	})
-	ir := compiler.Compile(nocontext)
+	compiler := Compiler{
+		Environ: provider.Static(nil),
+		Secret: secret.StaticVars(map[string]string{
+			"my_username": "octocat",
+		}),
+	}
+	args := runtime.CompilerArgs{
+		Repo:     &drone.Repo{},
+		Build:    &drone.Build{},
+		Stage:    &drone.Stage{},
+		System:   &drone.System{},
+		Netrc:    &drone.Netrc{},
+		Manifest: manifest,
+		Pipeline: manifest.Resources[0].(*resource.Pipeline),
+		Secret:   secret.Static(nil),
+	}
+	ir := compiler.Compile(nocontext, args)
 	got := ir.Steps[0].Secrets
 	want := []*engine.Secret{
 		{
@@ -153,15 +161,20 @@ func testCompile(t *testing.T, source, golden string) *engine.Spec {
 		return nil
 	}
 
-	compiler := Compiler{}
-	compiler.Build = &drone.Build{Target: "master"}
-	compiler.Repo = &drone.Repo{}
-	compiler.Stage = &drone.Stage{}
-	compiler.System = &drone.System{}
-	compiler.Netrc = &drone.Netrc{Machine: "github.com", Login: "octocat", Password: "correct-horse-battery-staple"}
-	compiler.Manifest = manifest
-	compiler.Pipeline = manifest.Resources[0].(*resource.Pipeline)
-	got := compiler.Compile(nocontext)
+	compiler := Compiler{
+		Environ: provider.Static(nil),
+		Secret:  secret.Static(nil),
+	}
+	args := runtime.CompilerArgs{
+		Manifest: manifest,
+		Pipeline: manifest.Resources[0].(*resource.Pipeline),
+		Build:    &drone.Build{Target: "master"},
+		Stage:    &drone.Stage{},
+		Repo:     &drone.Repo{},
+		System:   &drone.System{},
+		Netrc:    &drone.Netrc{Machine: "github.com", Login: "octocat", Password: "correct-horse-battery-staple"},
+	}
+	got := compiler.Compile(nocontext, args)
 
 	raw, err := ioutil.ReadFile(golden)
 	if err != nil {

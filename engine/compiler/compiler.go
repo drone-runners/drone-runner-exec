@@ -12,11 +12,11 @@ import (
 	"strings"
 
 	"github.com/drone-runners/drone-runner-exec/engine"
-	"github.com/drone-runners/drone-runner-exec/engine/resource"
+	"github.com/drone-runners/drone-runner-exec/runtime"
 
-	"github.com/drone/drone-go/drone"
 	"github.com/drone/runner-go/clone"
 	"github.com/drone/runner-go/environ"
+	"github.com/drone/runner-go/environ/provider"
 	"github.com/drone/runner-go/manifest"
 	"github.com/drone/runner-go/secret"
 	"github.com/drone/runner-go/shell"
@@ -34,43 +34,9 @@ var tempdir = os.TempDir
 // Compiler compiles the Yaml configuration file to an
 // intermediate representation optimized for simple execution.
 type Compiler struct {
-	// Manifest provides the parsed manifest.
-	Manifest *manifest.Manifest
-
-	// Pipeline provides the parsed pipeline. This pipeline is
-	// the compiler source and is converted to the intermediate
-	// representation by the Compile method.
-	Pipeline *resource.Pipeline
-
-	// Build provides the compiler with stage information that
-	// is converted to environment variable format and passed to
-	// each pipeline step. It is also used to clone the commit.
-	Build *drone.Build
-
-	// Stage provides the compiler with stage information that
-	// is converted to environment variable format and passed to
-	// each pipeline step.
-	Stage *drone.Stage
-
-	// Repo provides the compiler with repo information. This
-	// repo information is converted to environment variable
-	// format and passed to each pipeline step. It is also used
-	// to clone the repository.
-	Repo *drone.Repo
-
-	// System provides the compiler with system information that
-	// is converted to environment variable format and passed to
-	// each pipeline step.
-	System *drone.System
-
-	// Environ provides a set of environment varaibles that
+	// Environ provides a set of environment variables that
 	// should be added to each pipeline step by default.
-	Environ map[string]string
-
-	// Netrc provides netrc parameters that can be used by the
-	// default clone step to authenticate to the remote
-	// repository.
-	Netrc *drone.Netrc
+	Environ provider.Provider
 
 	// Secret returns a named secret value that can be injected
 	// into the pipeline step.
@@ -86,7 +52,7 @@ type Compiler struct {
 }
 
 // Compile compiles the configuration file.
-func (c *Compiler) Compile(ctx context.Context) *engine.Spec {
+func (c *Compiler) Compile(ctx context.Context, args runtime.CompilerArgs) *engine.Spec {
 	spec := new(engine.Spec)
 
 	if c.Root != "" {
@@ -101,10 +67,11 @@ func (c *Compiler) Compile(ctx context.Context) *engine.Spec {
 		)
 	}
 
-	spec.Platform.OS = c.Pipeline.Platform.OS
-	spec.Platform.Arch = c.Pipeline.Platform.Arch
-	spec.Platform.Variant = c.Pipeline.Platform.Variant
-	spec.Platform.Version = c.Pipeline.Platform.Version
+	pipeline := args.Pipeline
+	spec.Platform.OS = pipeline.Platform.OS
+	spec.Platform.Arch = pipeline.Platform.Arch
+	spec.Platform.Variant = pipeline.Platform.Variant
+	spec.Platform.Version = pipeline.Platform.Version
 
 	// creates a home directory in the root.
 	homedir := filepath.Join(spec.Root, "home", "drone")
@@ -130,13 +97,13 @@ func (c *Compiler) Compile(ctx context.Context) *engine.Spec {
 	})
 
 	// creates the netrc file
-	if c.Netrc != nil {
+	if args.Netrc != nil {
 		netrcpath := filepath.Join(homedir, netrc)
 		netrcdata := fmt.Sprintf(
 			"machine %s login %s password %s",
-			c.Netrc.Machine,
-			c.Netrc.Login,
-			c.Netrc.Password,
+			args.Netrc.Machine,
+			args.Netrc.Login,
+			args.Netrc.Password,
 		)
 		spec.Files = append(spec.Files, &engine.File{
 			Path: netrcpath,
@@ -153,23 +120,31 @@ func (c *Compiler) Compile(ctx context.Context) *engine.Spec {
 		})
 	}
 
+	// list the global environment variables
+	globals, _ := c.Environ.List(ctx, &provider.Request{
+		Build: args.Build,
+		Repo:  args.Repo,
+	})
+
 	// create the default environment variables.
 	envs := environ.Combine(
 		hostEnviron(),
-		c.Environ,
-		c.Build.Params,
+		provider.ToMap(
+			provider.FilterUnmasked(globals),
+		),
+		args.Build.Params,
 		environ.Proxy(),
-		environ.System(c.System),
-		environ.Repo(c.Repo),
-		environ.Build(c.Build),
-		environ.Stage(c.Stage),
-		environ.Link(c.Repo, c.Build, c.System),
+		environ.System(args.System),
+		environ.Repo(args.Repo),
+		environ.Build(args.Build),
+		environ.Stage(args.Stage),
+		environ.Link(args.Repo, args.Build, args.System),
 		clone.Environ(clone.Config{
-			SkipVerify: c.Pipeline.Clone.SkipVerify,
-			Trace:      c.Pipeline.Clone.Trace,
+			SkipVerify: pipeline.Clone.SkipVerify,
+			Trace:      pipeline.Clone.Trace,
 			User: clone.User{
-				Name:  c.Build.AuthorName,
-				Email: c.Build.AuthorEmail,
+				Name:  args.Build.AuthorName,
+				Email: args.Build.AuthorEmail,
 			},
 		}),
 		// TODO(bradrydzewski) windows variable HOMEDRIVE
@@ -185,18 +160,18 @@ func (c *Compiler) Compile(ctx context.Context) *engine.Spec {
 	)
 
 	// create clone step, maybe
-	if c.Pipeline.Clone.Disable == false {
+	if pipeline.Clone.Disable == false {
 		clonepath := filepath.Join(spec.Root, "opt", "clone"+shell.Suffix)
-		repoUrl := c.Repo.HTTPURL
-		if repoUrl == "" && c.Repo.SSHURL != "" {
-			repoUrl = c.Repo.SSHURL
+		repoUrl := args.Repo.HTTPURL
+		if repoUrl == "" && args.Repo.SSHURL != "" {
+			repoUrl = args.Repo.SSHURL
 		}
 		clonefile := shell.Script(
 			clone.Commands(
 				clone.Args{
-					Branch: c.Build.Target,
-					Commit: c.Build.After,
-					Ref:    c.Build.Ref,
+					Branch: args.Build.Target,
+					Commit: args.Build.After,
+					Ref:    args.Build.Ref,
 					Remote: repoUrl,
 				},
 			),
@@ -222,15 +197,15 @@ func (c *Compiler) Compile(ctx context.Context) *engine.Spec {
 	}
 
 	// create steps
-	for _, src := range c.Pipeline.Steps {
+	for _, src := range pipeline.Steps {
 		buildslug := slug.Make(src.Name)
 		buildpath := filepath.Join(spec.Root, "opt", buildslug+shell.Suffix)
 		buildfile := shell.Script(src.Commands)
 
-		cmd, args := shell.Command()
+		cmd, cmdArgs := shell.Command()
 		dst := &engine.Step{
 			Name:      src.Name,
-			Args:      append(args, buildpath),
+			Args:      append(cmdArgs, buildpath),
 			Command:   cmd,
 			Detach:    src.Detach,
 			DependsOn: src.DependsOn,
@@ -267,14 +242,14 @@ func (c *Compiler) Compile(ctx context.Context) *engine.Spec {
 		// if the pipeline step has unmet conditions the step is
 		// automatically skipped.
 		if !src.When.Match(manifest.Match{
-			Action:   c.Build.Action,
-			Cron:     c.Build.Cron,
-			Ref:      c.Build.Ref,
-			Repo:     c.Repo.Slug,
-			Instance: c.System.Host,
-			Target:   c.Build.Deploy,
-			Event:    c.Build.Event,
-			Branch:   c.Build.Target,
+			Action:   args.Build.Action,
+			Cron:     args.Build.Cron,
+			Ref:      args.Build.Ref,
+			Repo:     args.Repo.Slug,
+			Instance: args.System.Host,
+			Target:   args.Build.Deploy,
+			Event:    args.Build.Event,
+			Branch:   args.Build.Target,
 		}) {
 			dst.RunPolicy = engine.RunNever
 		}
@@ -282,19 +257,41 @@ func (c *Compiler) Compile(ctx context.Context) *engine.Spec {
 
 	if isGraph(spec) == false {
 		configureSerial(spec)
-	} else if c.Pipeline.Clone.Disable == false {
+	} else if pipeline.Clone.Disable == false {
 		configureCloneDeps(spec)
-	} else if c.Pipeline.Clone.Disable == true {
+	} else if pipeline.Clone.Disable == true {
 		removeCloneDeps(spec)
+	}
+
+	// HACK: append masked global variables to secrets
+	// this ensures the environment variable values are
+	// masked when printed to the console.
+	masked := provider.FilterMasked(globals)
+	for _, step := range spec.Steps {
+		for _, g := range masked {
+			step.Secrets = append(step.Secrets, &engine.Secret{
+				Name: g.Name,
+				Data: []byte(g.Data),
+				Mask: g.Mask,
+				Env:  g.Name,
+			})
+		}
 	}
 
 	for _, step := range spec.Steps {
 		for _, s := range step.Secrets {
-			found, _ := c.Secret.Find(ctx, &secret.Request{
+			// source secrets from the global secret provider
+			// and the repository secret provider.
+			provider := secret.Combine(
+				args.Secret,
+				c.Secret,
+			)
+
+			found, _ := provider.Find(ctx, &secret.Request{
 				Name:  s.Name,
-				Build: c.Build,
-				Repo:  c.Repo,
-				Conf:  c.Manifest,
+				Build: args.Build,
+				Repo:  args.Repo,
+				Conf:  args.Manifest,
 			})
 			if found != nil {
 				s.Data = []byte(found.Data)
